@@ -11,8 +11,7 @@ and the Flutter guide for
 [developing packages and plugins](https://flutter.dev/developing-packages).
 -->
 
-TODO: Put a short description of the package here that helps potential users
-know whether this package might be useful for them.
+This package helps to use our custom widgets and functions in varius situations
 
 ## Features
     - create custom widgets
@@ -23,13 +22,10 @@ know whether this package might be useful for them.
 import 'package:sy_customs/sy_customs.dart';
 
 ```
-TODO: List prerequisites and provide or point to information on how to
-start using the package.
+
 
 ## Usage
-
-TODO: Include short and useful examples for package users. Add longer examples
-to `/example` folder.
+ 
 
 ```dart
 void syCustomLoadingBox(BuildContext context, String title) {
@@ -46,7 +42,4 @@ void syCustomLoadingBox(BuildContext context, String title) {
 ```
 
 ## Additional information
-
-TODO: Tell users more about the package: where to find more information, how to
-contribute to the package, how to file issues, what response they can expect
-from the package authors, and more.
+if you have any issues or sugestions to this package feel free to contact sydeveloperslk@gmail.com
