@@ -19,10 +19,10 @@ know whether this package might be useful for them.
     - create custom functions
 
 ## Getting started
-'''dart
+```dart
 import 'package:sy_customs/sy_customs.dart';
 
-'''
+```
 TODO: List prerequisites and provide or point to information on how to
 start using the package.
 
