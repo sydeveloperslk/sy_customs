@@ -8,8 +8,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-Future<bool?> syCustomsConfirmPopUp(
-    BuildContext context, String title, String content,
+Future<bool?> syConfirmPopUp(BuildContext context, String title, String content,
     {String? boldString, String? no, String? yes, Color? boldColor}) async {
   return showDialog(
     context: context,
@@ -63,7 +62,7 @@ Future<bool?> syCustomsConfirmPopUp(
   );
 }
 
-void syCustomsLoadingBox(BuildContext context, String title) {
+void syLoadingBox(BuildContext context, String title) {
   showDialog(
     context: context,
     builder: (BuildContext context) {
@@ -75,22 +74,22 @@ void syCustomsLoadingBox(BuildContext context, String title) {
   );
 }
 
-void errorPrint(String s) {
+void syErrorPrint(String s) {
   // ignore: avoid_print
   print("errorPrint $s");
 }
 
-void resPrint(String url, String response) {
+void syResPrint(String url, String response) {
   // ignore: avoid_print
   print("resPrint url:$url response:$response ");
 }
 
-void alertPrint(String s) {
+void syAlertPrint(String s) {
   // ignore: avoid_print
   print("alertPrint $s");
 }
 
-class UpperCaseTextFormatter extends TextInputFormatter {
+class SYUpperCaseTextFormatter extends TextInputFormatter {
   @override
   TextEditingValue formatEditUpdate(
       TextEditingValue oldValue, TextEditingValue newValue) {
@@ -101,7 +100,7 @@ class UpperCaseTextFormatter extends TextInputFormatter {
   }
 }
 
-RichText someBoldText(BuildContext context, String? text) {
+RichText sySomeBoldText(BuildContext context, String? text) {
   if (text == null) {
     return RichText(
       text: const TextSpan(),
@@ -133,7 +132,7 @@ RichText someBoldText(BuildContext context, String? text) {
   );
 }
 
-String avoidZero(double mDouble) {
+String syAvoidZero(double mDouble) {
   if (mDouble % 1 == 0) {
     return mDouble.floor().toString();
   }
@@ -146,11 +145,11 @@ String avoidZero(double mDouble) {
   }
 }
 
-String? avoidZeroNullable(double? mDouble) {
+String? syAvoidZeroNullable(double? mDouble) {
   if (mDouble == null) {
     return null;
   }
-  return avoidZero(mDouble);
+  return syAvoidZero(mDouble);
 }
 
 void showToast(BuildContext context, String text) {
@@ -254,4 +253,16 @@ Future<DateTime?> selectDateTime(BuildContext context) async {
     }
   }
   return null;
+}
+
+class SYHexColor extends Color {
+  SYHexColor(final String hexColor) : super(_getColorFromHex(hexColor));
+
+  static int _getColorFromHex(String hexColor) {
+    hexColor = hexColor.toUpperCase().replaceAll('#', '');
+    if (hexColor.length == 6) {
+      hexColor = 'FF$hexColor';
+    }
+    return int.parse(hexColor, radix: 16);
+  }
 }
