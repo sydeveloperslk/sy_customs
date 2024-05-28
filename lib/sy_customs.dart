@@ -62,6 +62,29 @@ Future<bool?> syConfirmPopUp(BuildContext context, String title, String content,
   );
 }
 
+Future<void> syShowAlert(
+  BuildContext context,
+  String title,
+  String content,
+) async {
+  return showDialog(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        title: Text(title),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop(false);
+            },
+            child: const Text('Ok'),
+          ),
+        ],
+      );
+    },
+  );
+}
+
 void syLoadingBox(BuildContext context, String title) {
   showDialog(
     context: context,
