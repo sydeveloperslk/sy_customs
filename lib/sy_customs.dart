@@ -221,6 +221,10 @@ class SYIcon extends StatelessWidget {
         icon = 'assets/svg/construction.svg';
       case "whatsapp":
         icon = 'assets/svg/whatsapp.svg';
+      case "no_update":
+        icon = 'assets/svg/no_update.svg';
+      case "thinking":
+        icon = 'assets/svg/thinking.svg';
     }
     return SvgPicture.asset(
       icon,
