@@ -43,7 +43,7 @@ class _MyHomePageState extends State<MyHomePage> {
         Text("$val"),
         ElevatedButton(
             onPressed: () {
-              loadingBox(context, "title");
+              syCustomLoadingBox(context, "title");
               setState(() {
                 val = SYCalculator().addOne(val);
               });

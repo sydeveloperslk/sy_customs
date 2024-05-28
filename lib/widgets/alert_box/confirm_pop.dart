@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-Future<bool?> syCustomConfirmPopUp(
+Future<bool?> syCustomsConfirmPopUp(
     BuildContext context, String title, String content,
     {String? boldString, String? no, String? yes, Color? boldColor}) async {
   return showDialog(
