@@ -1,3 +1,6 @@
+## 0.0.6
+
+    - print added
 ## 0.0.5
 
     - set one file

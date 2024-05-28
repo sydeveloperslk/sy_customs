@@ -68,3 +68,18 @@ void syCustomsLoadingBox(BuildContext context, String title) {
     },
   );
 }
+
+void errorPrint(String s) {
+  // ignore: avoid_print
+  print("errorPrint $s");
+}
+
+void resPrint(String url, String response) {
+  // ignore: avoid_print
+  print("resPrint url:$url response:$response ");
+}
+
+void alertPrint(String s) {
+  // ignore: avoid_print
+  print("alertPrint $s");
+}
