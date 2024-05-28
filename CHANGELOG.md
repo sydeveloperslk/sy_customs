@@ -1,3 +1,7 @@
+## 0.0.11
+
+    - Some more data added 
+
 ## 0.0.10
 
     - Some more data added 

@@ -175,7 +175,7 @@ String? syAvoidZeroNullable(double? mDouble) {
   return syAvoidZero(mDouble);
 }
 
-void showToast(BuildContext context, String text) {
+void syShowToast(BuildContext context, String text) {
   // ignore: avoid_print
   print("Tost showing $text");
   if (Platform.isAndroid) {
