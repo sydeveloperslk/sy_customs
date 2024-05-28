@@ -1,3 +1,6 @@
+## 0.0.4
+
+    - Name changed
 ## 0.0.3
 
     - Bug fixed new
