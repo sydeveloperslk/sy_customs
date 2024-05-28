@@ -1,3 +1,6 @@
+## 0.0.7
+
+    - final 
 ## 0.0.6
 
     - print added
