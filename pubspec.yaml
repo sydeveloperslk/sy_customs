@@ -1,12 +1,12 @@
 name: sy_customs
 description: "A Flutter package that contains custom widgets."
-version: 0.0.11
+version: 0.0.18
 homepage: https://github.com/sydeveloperslk/sy_customs
 repository: "https://github.com/sydeveloperslk/sy_customs"
  
 environment:
   sdk: '>=3.2.3 <4.0.0'
-  flutter: ">=1.17.0"
+  flutter: ">=1.20.0"
 
 dependencies:
   flutter:
@@ -20,6 +20,14 @@ dev_dependencies:
   flutter_lints: ^2.0.0
 flutter:
   assets:
-    - assets/
+    - assets/svg/
+    
+  # plugin:
+  #   platforms:
+  #     ios:
+  #       pluginClass: sy_customs
+  #     windows:
+  #       pluginClass: sy_customs
+
  
    

@@ -2,6 +2,7 @@ library sy_customs;
 
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter_svg/svg.dart';
 
@@ -178,9 +179,19 @@ String? syAvoidZeroNullable(double? mDouble) {
 void syShowToast(BuildContext context, String text) {
   // ignore: avoid_print
   print("Tost showing $text");
-  if (Platform.isAndroid) {
-    Fluttertoast.showToast(msg: text);
-  } else if (Platform.isWindows) {
+  if (!kIsWeb) {
+    if (Platform.isAndroid) {
+      Fluttertoast.showToast(msg: text);
+    } else if (Platform.isWindows) {
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(text),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
+  } else {
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -224,30 +235,62 @@ class SYIcon extends StatelessWidget {
   final double size;
   @override
   Widget build(BuildContext context) {
-    String icon = 'assets/icons/gem.svg';
+    String icon = 'packages/sy_customs/assets/icons/error.svg';
     switch (data.toLowerCase()) {
+      case "lock":
+        icon = 'packages/sy_customs/assets/svg/lock.svg';
+        break;
       case "medal":
-        icon = 'assets/svg/medal.svg';
+        icon = 'packages/sy_customs/assets/svg/medal.svg';
+        break;
       case "danger":
-        icon = 'assets/svg/danger.svg';
+        icon = 'packages/sy_customs/assets/svg/danger.svg';
+        break;
       case "verify":
-        icon = 'assets/svg/ver.svg';
+        icon = 'packages/sy_customs/assets/svg/ver.svg';
+        break;
       case "star":
-        icon = 'assets/svg/star.svg';
+        icon = 'packages/sy_customs/assets/svg/star.svg';
+        break;
       case "empty":
-        icon = 'assets/svg/empty.svg';
+        icon = 'packages/sy_customs/assets/svg/empty.svg';
+        break;
       case "app":
-        icon = 'assets/svg/playStore.svg';
+        icon = 'packages/sy_customs/assets/svg/playStore.svg';
+        break;
       case "map":
-        icon = 'assets/svg/map.svg';
+        icon = 'packages/sy_customs/assets/svg/map.svg';
+        break;
       case "construction":
-        icon = 'assets/svg/construction.svg';
+        icon = 'packages/sy_customs/assets/svg/construction.svg';
+        break;
       case "whatsapp":
-        icon = 'assets/svg/whatsapp.svg';
+        icon = 'packages/sy_customs/assets/svg/whatsapp.svg';
+        break;
       case "no_update":
-        icon = 'assets/svg/no_update.svg';
+        icon = 'packages/sy_customs/assets/svg/no_update.svg';
+        break;
       case "thinking":
-        icon = 'assets/svg/thinking.svg';
+        icon = 'packages/sy_customs/assets/svg/thinking.svg';
+        break;
+      case "form":
+        icon = 'packages/sy_customs/assets/svg/form.svg';
+        break;
+      case "new_form":
+        icon = 'packages/sy_customs/assets/svg/new_form.svg';
+        break;
+      case "house":
+        icon = 'packages/sy_customs/assets/svg/house.svg';
+        break;
+      case "building":
+        icon = 'packages/sy_customs/assets/svg/building.svg';
+        break;
+      case "all_form":
+        icon = 'packages/sy_customs/assets/svg/all_form.svg';
+        break;
+      case "edit":
+        icon = 'packages/sy_customs/assets/svg/edit.svg';
+        break;
     }
     return SvgPicture.asset(
       icon,
