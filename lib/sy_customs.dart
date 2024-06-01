@@ -1,6 +1,7 @@
 library sy_customs;
 
 import 'dart:io';
+import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -120,6 +121,32 @@ class SYUpperCaseTextFormatter extends TextInputFormatter {
     return TextEditingValue(
       text: newValue.text.toUpperCase(),
       selection: newValue.selection,
+    );
+  }
+}
+
+class SYBlurredUnit extends StatelessWidget {
+  const SYBlurredUnit(
+      {super.key, required this.uint8list, required this.blurDouble});
+  final Uint8List uint8list;
+  final double blurDouble;
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: double.infinity,
+      width: double.infinity,
+      decoration: BoxDecoration(
+        image: DecorationImage(
+          image: MemoryImage(uint8list),
+          fit: BoxFit.fill,
+        ),
+      ),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: blurDouble, sigmaY: blurDouble),
+        child: Container(
+          color: Colors.black.withOpacity(0.2134),
+        ),
+      ),
     );
   }
 }
