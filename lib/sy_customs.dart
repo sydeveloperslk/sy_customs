@@ -126,10 +126,15 @@ class SYUpperCaseTextFormatter extends TextInputFormatter {
 }
 
 class SYBlurredUnit extends StatelessWidget {
-  const SYBlurredUnit(
-      {super.key, required this.uint8list, required this.blurDouble});
+  const SYBlurredUnit({
+    super.key,
+    required this.uint8list,
+    required this.blurDouble,
+    this.boxFit = BoxFit.fill,
+  });
   final Uint8List uint8list;
   final double blurDouble;
+  final BoxFit boxFit;
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -138,7 +143,7 @@ class SYBlurredUnit extends StatelessWidget {
       decoration: BoxDecoration(
         image: DecorationImage(
           image: MemoryImage(uint8list),
-          fit: BoxFit.fill,
+          fit: boxFit,
         ),
       ),
       child: BackdropFilter(
@@ -317,6 +322,30 @@ class SYIcon extends StatelessWidget {
         break;
       case "edit":
         icon = 'packages/sy_customs/assets/svg/edit.svg';
+        break;
+      case "users":
+        icon = 'packages/sy_customs/assets/svg/users.svg';
+        break;
+      case "cash":
+        icon = 'packages/sy_customs/assets/svg/cash.svg';
+        break;
+      case "bed":
+        icon = 'packages/sy_customs/assets/svg/bed.svg';
+        break;
+      case "notice_board":
+        icon = 'packages/sy_customs/assets/svg/notice_board.svg';
+        break;
+      case "calendar":
+        icon = 'packages/sy_customs/assets/svg/calendar.svg';
+        break;
+      case "notice_board":
+        icon = 'packages/sy_customs/assets/svg/notice_board.svg';
+        break;
+      case "notice_board":
+        icon = 'packages/sy_customs/assets/svg/notice_board.svg';
+        break;
+      case "notice_board":
+        icon = 'packages/sy_customs/assets/svg/notice_board.svg';
         break;
     }
     return SvgPicture.asset(
