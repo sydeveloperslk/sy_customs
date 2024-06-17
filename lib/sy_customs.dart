@@ -2,13 +2,32 @@ library sy_customs;
 
 import 'dart:io';
 import 'dart:ui';
-
+import 'package:gap/gap.dart';
 import 'package:flutter/foundation.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+// import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter_svg/svg.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
+List<String> syStringToList(String? data, int length) {
+  if (data == null || data.isEmpty) {
+    return List.filled(length, '');
+  }
+
+  List<String> words = data.split('');
+  // If the number of words is less than the specified length, add empty strings
+  while (words.length < length) {
+    words.add('');
+  }
+
+  // If the number of words is more than the specified length, trim the list from the last
+  if (words.length > length) {
+    words = words.sublist(0, length);
+  }
+
+  return words;
+}
 
 Future<bool?> syConfirmPopUp(BuildContext context, String title, String content,
     {String? boldString, String? no, String? yes, Color? boldColor}) async {
@@ -64,6 +83,96 @@ Future<bool?> syConfirmPopUp(BuildContext context, String title, String content,
   );
 }
 
+class PageUnderCons extends StatefulWidget {
+  const PageUnderCons({super.key});
+
+  @override
+  State<PageUnderCons> createState() => _PageUnderConsState();
+}
+
+class _PageUnderConsState extends State<PageUnderCons> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(),
+      body: const Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SYIcon(
+              data: "construction",
+              size: 150,
+            ),
+            Gap(20),
+            Text(
+              "Page Under Contraction",
+              style: TextStyle(
+                color: Colors.red,
+                fontWeight: FontWeight.bold,
+                fontSize: 30,
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class SYTextField extends StatefulWidget {
+  const SYTextField(
+      {super.key,
+      this.borderColor = Colors.black,
+      this.focusBorderColor = Colors.black,
+      required this.label,
+      this.old,
+      this.textStyle = const TextStyle(),
+      required this.onChanged});
+  final Color borderColor;
+  final Color focusBorderColor;
+  final String label;
+  final String? old;
+  final TextStyle textStyle;
+  final Function(String) onChanged;
+
+  @override
+  State<SYTextField> createState() => _SYTextFieldState();
+}
+
+class _SYTextFieldState extends State<SYTextField> {
+  TextEditingController textEditingController = TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+    if (widget.old != null) {
+      textEditingController.text = widget.old!;
+    }
+
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: TextField(
+        controller: textEditingController,
+        decoration: InputDecoration(
+          enabledBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: widget.borderColor, width: 2.0),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: widget.focusBorderColor, width: 2.0),
+          ),
+          errorBorder: const OutlineInputBorder(
+            borderSide: BorderSide(color: Colors.red, width: 2.0),
+          ),
+          label: Text(
+            widget.label,
+            style: widget.textStyle,
+          ),
+        ),
+        onChanged: widget.onChanged,
+      ),
+    );
+  }
+}
+
 Future<void> syShowAlert(
   BuildContext context,
   String title,
@@ -74,6 +183,7 @@ Future<void> syShowAlert(
     builder: (context) {
       return AlertDialog(
         title: Text(title),
+        content: Text(content),
         actions: [
           TextButton(
             onPressed: () {
@@ -213,7 +323,7 @@ void syShowToast(BuildContext context, String text) {
   print("Tost showing $text");
   if (!kIsWeb) {
     if (Platform.isAndroid) {
-      Fluttertoast.showToast(msg: text);
+      // Fluttertoast.showToast(msg: text);
     } else if (Platform.isWindows) {
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
@@ -250,7 +360,10 @@ class Nav {
   }
 
   static Future<void> pop(BuildContext context) async {
-    Navigator.of(context).pop();
+    bool canPop = Navigator.of(context).canPop();
+    if (canPop) {
+      Navigator.of(context).pop(); // Close this screen and go back
+    }
   }
 
   static void navigateWithBack(
@@ -338,8 +451,8 @@ class SYIcon extends StatelessWidget {
       case "calendar":
         icon = 'packages/sy_customs/assets/svg/calendar.svg';
         break;
-      case "notice_board":
-        icon = 'packages/sy_customs/assets/svg/notice_board.svg';
+      case "google_map_colored":
+        icon = 'packages/sy_customs/assets/svg/google_map_colored.svg';
         break;
       case "notice_board":
         icon = 'packages/sy_customs/assets/svg/notice_board.svg';
