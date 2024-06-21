@@ -4,7 +4,7 @@ import 'dart:io';
 import 'dart:ui';
 import 'package:gap/gap.dart';
 import 'package:flutter/foundation.dart';
-// import 'package:fluttertoast/fluttertoast.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter_svg/svg.dart';
 
 import 'package:flutter/material.dart';
@@ -323,7 +323,7 @@ void syShowToast(BuildContext context, String text) {
   print("Tost showing $text");
   if (!kIsWeb) {
     if (Platform.isAndroid) {
-      // Fluttertoast.showToast(msg: text);
+      Fluttertoast.showToast(msg: text);
     } else if (Platform.isWindows) {
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
@@ -457,8 +457,11 @@ class SYIcon extends StatelessWidget {
       case "notice_board":
         icon = 'packages/sy_customs/assets/svg/notice_board.svg';
         break;
-      case "notice_board":
-        icon = 'packages/sy_customs/assets/svg/notice_board.svg';
+      case "muslim_man":
+        icon = 'packages/sy_customs/assets/svg/muslim_man.svg';
+        break;
+      case "muslim_woman":
+        icon = 'packages/sy_customs/assets/svg/muslim_woman.svg';
         break;
     }
     return SvgPicture.asset(
