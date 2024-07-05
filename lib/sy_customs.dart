@@ -127,9 +127,11 @@ class SYTextField extends StatefulWidget {
       required this.label,
       this.old,
       this.textStyle = const TextStyle(),
-      required this.onChanged});
+      required this.onChanged,
+      this.inputFormatters});
   final Color borderColor;
   final Color focusBorderColor;
+  final List<TextInputFormatter>? inputFormatters;
   final String label;
   final String? old;
   final TextStyle textStyle;
@@ -152,6 +154,7 @@ class _SYTextFieldState extends State<SYTextField> {
       padding: const EdgeInsets.all(8.0),
       child: TextField(
         controller: textEditingController,
+        inputFormatters: widget.inputFormatters,
         decoration: InputDecoration(
           enabledBorder: OutlineInputBorder(
             borderSide: BorderSide(color: widget.borderColor, width: 2.0),
@@ -296,6 +299,17 @@ RichText sySomeBoldText(BuildContext context, String? text) {
       children: mTextSpans,
     ),
   );
+}
+
+class SYBox extends StatelessWidget {
+  const SYBox({super.key, required this.size, required this.child});
+  final double size;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(width: size, height: size, child: child);
+  }
 }
 
 String syAvoidZero(double mDouble) {
@@ -454,14 +468,42 @@ class SYIcon extends StatelessWidget {
       case "google_map_colored":
         icon = 'packages/sy_customs/assets/svg/google_map_colored.svg';
         break;
-      case "notice_board":
-        icon = 'packages/sy_customs/assets/svg/notice_board.svg';
-        break;
+
       case "muslim_man":
         icon = 'packages/sy_customs/assets/svg/muslim_man.svg';
         break;
       case "muslim_woman":
         icon = 'packages/sy_customs/assets/svg/muslim_woman.svg';
+        break;
+      case "new":
+        icon = 'packages/sy_customs/assets/svg/new.svg';
+        break;
+      case "switch":
+        icon = 'packages/sy_customs/assets/svg/switch.svg';
+        break;
+      case "approved":
+        icon = 'packages/sy_customs/assets/svg/approved.svg';
+        break;
+      case "approved":
+        icon = 'packages/sy_customs/assets/svg/approved.svg';
+        break;
+      case "approved":
+        icon = 'packages/sy_customs/assets/svg/approved.svg';
+        break;
+      case "approved":
+        icon = 'packages/sy_customs/assets/svg/approved.svg';
+        break;
+      case "approved":
+        icon = 'packages/sy_customs/assets/svg/approved.svg';
+        break;
+      case "approved":
+        icon = 'packages/sy_customs/assets/svg/approved.svg';
+        break;
+      case "approved":
+        icon = 'packages/sy_customs/assets/svg/approved.svg';
+        break;
+      case "rejected":
+        icon = 'packages/sy_customs/assets/svg/rejected.svg';
         break;
     }
     return SvgPicture.asset(
