@@ -119,6 +119,47 @@ class _PageUnderConsState extends State<PageUnderCons> {
   }
 }
 
+class SYTab extends StatelessWidget {
+  const SYTab({super.key, required this.bars, required this.tabs});
+  final List<Widget> bars;
+  final List<Widget> tabs;
+  @override
+  Widget build(BuildContext context) {
+    return DefaultTabController(
+      length: bars.length,
+      child: Column(
+        children: [
+          TabBar(
+            tabs: bars
+                .map((bar) => Padding(
+                      padding: const EdgeInsets.all(
+                          8.0), // Adjust the padding as needed
+                      child: bar,
+                    ))
+                .toList(),
+          ),
+          Expanded(
+            child: TabBarView(
+              children: tabs,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+String syListToString(List<String> data) {
+  return data.join();
+}
+
+String syRenameEmptyString(String data, String ifEmpty) {
+  if (data.trim().isEmpty) {
+    return ifEmpty;
+  }
+  return data;
+}
+
 class SYTextField extends StatefulWidget {
   const SYTextField(
       {super.key,
@@ -128,10 +169,12 @@ class SYTextField extends StatefulWidget {
       this.old,
       this.textStyle = const TextStyle(),
       required this.onChanged,
-      this.inputFormatters});
+      this.inputFormatters,
+      this.optionList});
   final Color borderColor;
   final Color focusBorderColor;
   final List<TextInputFormatter>? inputFormatters;
+  final List<String>? optionList;
   final String label;
   final String? old;
   final TextStyle textStyle;
@@ -149,29 +192,71 @@ class _SYTextFieldState extends State<SYTextField> {
     if (widget.old != null) {
       textEditingController.text = widget.old!;
     }
-
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: TextField(
-        controller: textEditingController,
-        inputFormatters: widget.inputFormatters,
-        decoration: InputDecoration(
-          enabledBorder: OutlineInputBorder(
-            borderSide: BorderSide(color: widget.borderColor, width: 2.0),
+    return Autocomplete<String>(
+      optionsBuilder: (TextEditingValue textEditingValue) {
+        if (widget.optionList == null) {
+          return const Iterable<String>.empty();
+        }
+        return widget.optionList!.where((String option) {
+          return option
+              .toLowerCase()
+              .contains(textEditingValue.text.toLowerCase());
+        });
+      },
+      optionsViewBuilder: (BuildContext context,
+          AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
+        return Align(
+          alignment: Alignment.topLeft,
+          child: Container(
+            color: const Color.fromARGB(156, 0, 0, 0),
+            width: 300, // Set your desired width here
+            child: ListView.builder(
+              padding: const EdgeInsets.all(8.0),
+              itemCount: options.length,
+              itemBuilder: (BuildContext context, int index) {
+                final String option = options.elementAt(index);
+                return Card(
+                  color: const Color.fromARGB(255, 249, 237, 237),
+                  child: ListTile(
+                    onTap: () {
+                      onSelected(option);
+                    },
+                    title: Text(option),
+                  ),
+                );
+              },
+            ),
           ),
-          focusedBorder: OutlineInputBorder(
-            borderSide: BorderSide(color: widget.focusBorderColor, width: 2.0),
+        );
+      },
+      onSelected: widget.onChanged,
+      fieldViewBuilder: (BuildContext context,
+          TextEditingController textEditingController,
+          FocusNode focusNode,
+          VoidCallback onFieldSubmitted) {
+        return TextField(
+          controller: textEditingController,
+          inputFormatters: widget.inputFormatters,
+          focusNode: focusNode,
+          decoration: InputDecoration(
+            enabledBorder: OutlineInputBorder(
+              borderSide: BorderSide(color: widget.borderColor, width: 2.0),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderSide:
+                  BorderSide(color: widget.focusBorderColor, width: 2.0),
+            ),
+            errorBorder: const OutlineInputBorder(
+              borderSide: BorderSide(color: Colors.red, width: 2.0),
+            ),
+            label: Text(
+              widget.label,
+              style: widget.textStyle,
+            ),
           ),
-          errorBorder: const OutlineInputBorder(
-            borderSide: BorderSide(color: Colors.red, width: 2.0),
-          ),
-          label: Text(
-            widget.label,
-            style: widget.textStyle,
-          ),
-        ),
-        onChanged: widget.onChanged,
-      ),
+          onChanged: widget.onChanged,
+        );
+      },
     );
   }
 }
