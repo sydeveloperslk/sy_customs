@@ -153,11 +153,310 @@ String syListToString(List<String> data) {
   return data.join();
 }
 
+Future<bool?> syPreviewConfirmPopUp(
+    BuildContext context, String title, String content,
+    {String? boldString,
+    String? no,
+    String? yes,
+    Color? boldColor,
+    Widget? sample}) async {
+  return showDialog(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        title: Text(title),
+        content: SizedBox(
+          width: MediaQuery.of(context).size.width * 0.8,
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                sample ?? Container(),
+                RichText(
+                  text: TextSpan(
+                    children: [
+                      TextSpan(
+                        text: content,
+                        style: const TextStyle(
+                          color: Colors.black,
+                        ),
+                      ),
+                      TextSpan(
+                        text: boldString,
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: boldColor ?? Colors.red,
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop(false);
+            },
+            child: Text(no ?? 'Cancel'),
+          ),
+          Visibility(
+            visible: yes != "",
+            child: TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(true);
+              },
+              child: Text(
+                yes ?? 'Yes',
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.red,
+                ),
+              ),
+            ),
+          ),
+        ],
+      );
+    },
+  );
+}
+
 String syRenameEmptyString(String data, String ifEmpty) {
   if (data.trim().isEmpty) {
     return ifEmpty;
   }
   return data;
+}
+
+class GenderSelector extends StatelessWidget {
+  const GenderSelector(
+      {super.key,
+      required this.isMaleSelected,
+      required this.isMaleOld,
+      this.options = const TextStyle(fontFamily: 'raleway', fontSize: 20)});
+  final Function(bool) isMaleSelected;
+  final bool? isMaleOld;
+  final TextStyle? options;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Row(
+          children: [
+            const Gap(20),
+            Text(
+              "Gender",
+              style: options,
+            ),
+            const Spacer(),
+            GestureDetector(
+              onTap: () {
+                isMaleSelected(true);
+              },
+              child: Card(
+                color: isMaleOld == true
+                    ? Colors.amber
+                    : const Color.fromARGB(255, 248, 226, 226),
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Row(
+                    children: [
+                      const SYIcon(
+                        data: "muslim_man",
+                        size: 33,
+                      ),
+                      const Gap(10),
+                      Text(
+                        "Male",
+                        style: options,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            GestureDetector(
+              onTap: () {
+                isMaleSelected(false);
+              },
+              child: Card(
+                color: isMaleOld == false
+                    ? Colors.amber
+                    : const Color.fromARGB(255, 248, 226, 226),
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Row(
+                    children: [
+                      const SYIcon(
+                        data: "muslim_woman",
+                        size: 33,
+                      ),
+                      const Gap(10),
+                      Text(
+                        "Female",
+                        style: options,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            const Spacer(),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+List<double> syListToDouble(List<String> data) {
+  return data.map((e) => double.tryParse(e) ?? 0.0).toList();
+}
+
+int syListToInt(List<String> data) {
+  return int.parse(
+      data.map((e) => int.tryParse(e) ?? 0).toList().join().toString());
+}
+
+class DateOfBirthSelector extends StatefulWidget {
+  const DateOfBirthSelector(
+      {super.key, required this.selected, this.old, this.options});
+  final Function(DateTime) selected;
+  final DateTime? old;
+  final TextStyle? options;
+
+  @override
+  State<DateOfBirthSelector> createState() => _DateOfBirthSelectorState();
+}
+
+class _DateOfBirthSelectorState extends State<DateOfBirthSelector> {
+  int? selectedYear;
+  int? selectedMonth;
+  int? selectedDay;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.options != null) {
+      options = widget.options!;
+    }
+    if (widget.old != null) {
+      selectedYear = widget.old!.year;
+      selectedMonth = widget.old!.month;
+      selectedDay = widget.old!.day;
+    }
+  }
+
+  void _onDateChanged() {
+    if (selectedYear != null && selectedMonth != null && selectedDay != null) {
+      DateTime selectedDate =
+          DateTime(selectedYear!, selectedMonth!, selectedDay!);
+      widget.selected(selectedDate);
+    }
+  }
+
+  TextStyle options = const TextStyle(fontFamily: 'raleway', fontSize: 30);
+
+  @override
+  Widget build(BuildContext context) {
+    List<int> years = List<int>.generate(101, (i) => DateTime.now().year - i);
+    List<int> months = List<int>.generate(12, (i) => i + 1);
+    List<int> days = selectedYear != null && selectedMonth != null
+        ? List<int>.generate(
+            DateTime(selectedYear!, selectedMonth! + 1, 0).day, (i) => i + 1)
+        : [];
+    initState() {}
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            const Gap(20),
+            Text("Date of Birth", style: options),
+            const Gap(20),
+            const Gap(20),
+            Text(
+                "Selected ${selectedYear ?? "YYYY"}-${selectedMonth ?? "MM"}-${selectedDay ?? "DD"} ",
+                style: options.copyWith(fontFamily: "apple")),
+            const Spacer(),
+            DropdownButton<int>(
+              hint: const Text("Year"),
+              value: selectedYear,
+              items: years.map((int value) {
+                return DropdownMenuItem<int>(
+                  value: value,
+                  child: Text(value.toString(), style: options),
+                );
+              }).toList(),
+              onChanged: (value) {
+                if (selectedYear != null &&
+                    selectedMonth != null &&
+                    selectedDay != null) {
+                  widget.selected(
+                      DateTime(selectedYear!, selectedMonth!, selectedDay!));
+                }
+                setState(() {
+                  selectedYear = value;
+                });
+                _onDateChanged();
+              },
+            ),
+            const Gap(20),
+            DropdownButton<int>(
+              hint: const Text("Month"),
+              value: selectedMonth,
+              items: months.map((int value) {
+                return DropdownMenuItem<int>(
+                  value: value,
+                  child: Text(value.toString(), style: options),
+                );
+              }).toList(),
+              onChanged: (value) {
+                if (selectedYear != null &&
+                    selectedMonth != null &&
+                    selectedDay != null) {
+                  widget.selected(
+                      DateTime(selectedYear!, selectedMonth!, selectedDay!));
+                }
+                setState(() {
+                  selectedMonth = value;
+                });
+                _onDateChanged();
+              },
+            ),
+            const Gap(20),
+            DropdownButton<int>(
+              hint: const Text("Day"),
+              value: selectedDay,
+              items: days.map((int value) {
+                return DropdownMenuItem<int>(
+                  value: value,
+                  child: Text(value.toString(), style: options),
+                );
+              }).toList(),
+              onChanged: (value) {
+                if (selectedYear != null &&
+                    selectedMonth != null &&
+                    selectedDay != null) {
+                  widget.selected(
+                      DateTime(selectedYear!, selectedMonth!, selectedDay!));
+                }
+                setState(() {
+                  selectedDay = value;
+                });
+                _onDateChanged();
+              },
+            ),
+            const Gap(20),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 class SYTextField extends StatefulWidget {
@@ -178,62 +477,72 @@ class SYTextField extends StatefulWidget {
   final String label;
   final String? old;
   final TextStyle textStyle;
-  final Function(String) onChanged;
+  final Function(String, bool) onChanged;
 
   @override
   State<SYTextField> createState() => _SYTextFieldState();
 }
 
 class _SYTextFieldState extends State<SYTextField> {
-  TextEditingController textEditingController = TextEditingController();
-
   @override
   Widget build(BuildContext context) {
-    if (widget.old != null) {
-      textEditingController.text = widget.old!;
-    }
     return Autocomplete<String>(
       optionsBuilder: (TextEditingValue textEditingValue) {
         if (widget.optionList == null) {
           return const Iterable<String>.empty();
         }
-        return widget.optionList!.where((String option) {
+
+        List<String> h = widget.optionList!.where((String option) {
           return option
               .toLowerCase()
               .contains(textEditingValue.text.toLowerCase());
-        });
+        }).toList();
+        textEditingValue.text.isNotEmpty &&
+                !h.contains(textEditingValue.text.toLowerCase())
+            ? h.add(textEditingValue.text.toLowerCase())
+            : null;
+
+        return h.map((f) => sySentenceCase(f)).toList();
       },
-      optionsViewBuilder: (BuildContext context,
-          AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
-        return Align(
-          alignment: Alignment.topLeft,
-          child: Container(
-            color: const Color.fromARGB(156, 0, 0, 0),
-            width: 300, // Set your desired width here
-            child: ListView.builder(
-              padding: const EdgeInsets.all(8.0),
-              itemCount: options.length,
-              itemBuilder: (BuildContext context, int index) {
-                final String option = options.elementAt(index);
-                return Card(
-                  color: const Color.fromARGB(255, 249, 237, 237),
-                  child: ListTile(
-                    onTap: () {
-                      onSelected(option);
+      optionsViewBuilder: widget.optionList == null
+          ? null
+          : (BuildContext context, AutocompleteOnSelected<String> onSelected,
+              Iterable<String> options) {
+              return Align(
+                alignment: Alignment.topLeft,
+                child: Container(
+                  color: const Color.fromARGB(156, 0, 0, 0),
+                  width: 300, // Set your desired width here
+                  child: ListView.builder(
+                    padding: const EdgeInsets.all(8.0),
+                    itemCount: options.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      String option = options.elementAt(index);
+
+                      return Card(
+                        color: const Color.fromARGB(255, 249, 237, 237),
+                        child: ListTile(
+                          onTap: () {
+                            onSelected(option);
+                          },
+                          title: Text(option),
+                        ),
+                      );
                     },
-                    title: Text(option),
                   ),
-                );
-              },
-            ),
-          ),
-        );
+                ),
+              );
+            },
+      onSelected: (dd) {
+        widget.onChanged(dd, true);
       },
-      onSelected: widget.onChanged,
       fieldViewBuilder: (BuildContext context,
           TextEditingController textEditingController,
           FocusNode focusNode,
           VoidCallback onFieldSubmitted) {
+        if (widget.old != null) {
+          textEditingController.text = widget.old!;
+        }
         return TextField(
           controller: textEditingController,
           inputFormatters: widget.inputFormatters,
@@ -254,9 +563,49 @@ class _SYTextFieldState extends State<SYTextField> {
               style: widget.textStyle,
             ),
           ),
-          onChanged: widget.onChanged,
+          onChanged: (df) {
+            widget.onChanged(df, false);
+          },
         );
       },
+    );
+  }
+}
+
+String? sySentenceCaseNullable(String? old) {
+  if (old == null) {
+    return null;
+  }
+  if (old.isEmpty) {
+    return old;
+  }
+  return old.split(' ').map((word) {
+    if (word.isEmpty) return word;
+    return word[0].toUpperCase() + word.substring(1).toLowerCase();
+  }).join(' ');
+}
+
+String sySentenceCase(String old) {
+  if (old.isEmpty) {
+    return old;
+  }
+  return old.split(' ').map((word) {
+    if (word.isEmpty) return word;
+    return word[0].toUpperCase() + word.substring(1).toLowerCase();
+  }).join(' ');
+}
+
+class SYOnDebugText extends StatelessWidget {
+  const SYOnDebugText({super.key, required this.text});
+  final String text;
+  @override
+  Widget build(BuildContext context) {
+    if (!kDebugMode) {
+      return Container();
+    }
+    return Text(
+      "Debug: $text",
+      style: const TextStyle(color: Colors.red),
     );
   }
 }
