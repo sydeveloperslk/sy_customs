@@ -358,7 +358,7 @@ class _DateOfBirthSelectorState extends State<DateOfBirthSelector> {
     }
   }
 
-  TextStyle options = const TextStyle(fontFamily: 'raleway', fontSize: 30);
+  TextStyle options = const TextStyle(fontFamily: 'raleway', fontSize: 20);
 
   @override
   Widget build(BuildContext context) {
@@ -460,16 +460,19 @@ class _DateOfBirthSelectorState extends State<DateOfBirthSelector> {
 }
 
 class SYTextField extends StatefulWidget {
-  const SYTextField(
-      {super.key,
-      this.borderColor = Colors.black,
-      this.focusBorderColor = Colors.black,
-      required this.label,
-      this.old,
-      this.textStyle = const TextStyle(),
-      required this.onChanged,
-      this.inputFormatters,
-      this.optionList});
+  const SYTextField({
+    super.key,
+    this.borderColor = Colors.black,
+    this.focusBorderColor = Colors.black,
+    required this.label,
+    this.old,
+    this.textStyle = const TextStyle(),
+      this.onChanged,
+    this.inputFormatters,
+    this.optionList,
+      this.onSubmitted,
+      this.onClean,
+  });
   final Color borderColor;
   final Color focusBorderColor;
   final List<TextInputFormatter>? inputFormatters;
@@ -477,13 +480,16 @@ class SYTextField extends StatefulWidget {
   final String label;
   final String? old;
   final TextStyle textStyle;
-  final Function(String, bool) onChanged;
+  final Function(String)? onChanged;
+  final Function()? onClean;
+  final Function(String)? onSubmitted;
 
   @override
   State<SYTextField> createState() => _SYTextFieldState();
 }
 
 class _SYTextFieldState extends State<SYTextField> {
+  String goingToAdd = "";
   @override
   Widget build(BuildContext context) {
     return Autocomplete<String>(
@@ -497,10 +503,13 @@ class _SYTextFieldState extends State<SYTextField> {
               .toLowerCase()
               .contains(textEditingValue.text.toLowerCase());
         }).toList();
-        textEditingValue.text.isNotEmpty &&
-                !h.contains(textEditingValue.text.toLowerCase())
-            ? h.add(textEditingValue.text.toLowerCase())
-            : null;
+        if (textEditingValue.text.isNotEmpty &&
+            !h.contains(textEditingValue.text.toLowerCase())) {
+          h.add(textEditingValue.text.toLowerCase());
+          goingToAdd = textEditingValue.text.toLowerCase();
+        } else {
+          goingToAdd = "";
+        }
 
         return h.map((f) => sySentenceCase(f)).toList();
       },
@@ -522,8 +531,18 @@ class _SYTextFieldState extends State<SYTextField> {
                       return Card(
                         color: const Color.fromARGB(255, 249, 237, 237),
                         child: ListTile(
-                          onTap: () {
-                            onSelected(option);
+                          onTap: () async {
+                            if (goingToAdd == option) {
+                              bool? c = await syConfirmPopUp(
+                                  context,
+                                  "Conform Add",
+                                  "Do you need to add new value $option");
+                              if (c != null && c) {
+                                onSelected(option);
+                              }
+                            } else {
+                              onSelected(option);
+                            }
                           },
                           title: Text(option),
                         ),
@@ -534,7 +553,9 @@ class _SYTextFieldState extends State<SYTextField> {
               );
             },
       onSelected: (dd) {
-        widget.onChanged(dd, true);
+        if (widget.onSubmitted != null) {
+          widget.onSubmitted!(dd);
+        }
       },
       fieldViewBuilder: (BuildContext context,
           TextEditingController textEditingController,
@@ -543,29 +564,49 @@ class _SYTextFieldState extends State<SYTextField> {
         if (widget.old != null) {
           textEditingController.text = widget.old!;
         }
-        return TextField(
-          controller: textEditingController,
-          inputFormatters: widget.inputFormatters,
-          focusNode: focusNode,
-          decoration: InputDecoration(
-            enabledBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: widget.borderColor, width: 2.0),
+        return Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: TextField(
+            controller: textEditingController,
+            inputFormatters: widget.inputFormatters,
+            focusNode: focusNode,
+            decoration: InputDecoration(
+              enabledBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: widget.borderColor, width: 2.0),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderSide:
+                    BorderSide(color: widget.focusBorderColor, width: 2.0),
+              ),
+              errorBorder: const OutlineInputBorder(
+                borderSide: BorderSide(color: Colors.red, width: 2.0),
+              ),
+              label: Text(
+                widget.label,
+                style: widget.textStyle,
+              ),
+              suffixIcon: widget.onSubmitted == null
+                  ? const SizedBox()
+                  : IconButton(
+                      onPressed: () {
+                        if (textEditingController.text.isNotEmpty) {
+                          widget.onSubmitted!(textEditingController.text);
+                        }
+                      },
+                      icon: const Icon(Icons.check)),
             ),
-            focusedBorder: OutlineInputBorder(
-              borderSide:
-                  BorderSide(color: widget.focusBorderColor, width: 2.0),
-            ),
-            errorBorder: const OutlineInputBorder(
-              borderSide: BorderSide(color: Colors.red, width: 2.0),
-            ),
-            label: Text(
-              widget.label,
-              style: widget.textStyle,
-            ),
+            onChanged: (dd) {
+              if (dd.isEmpty) {
+                if (widget.onClean != null) {
+                  widget.onClean!();
+                }
+              } else {
+                if (widget.onChanged != null) {
+                  widget.onChanged!(dd);
+                }
+              }
+            },
           ),
-          onChanged: (df) {
-            widget.onChanged(df, false);
-          },
         );
       },
     );
