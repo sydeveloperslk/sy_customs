@@ -6,7 +6,7 @@ import 'package:gap/gap.dart';
 import 'package:flutter/foundation.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter_svg/svg.dart';
-
+import 'package:swipeable_button_view/swipeable_button_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -467,11 +467,11 @@ class SYTextField extends StatefulWidget {
     required this.label,
     this.old,
     this.textStyle = const TextStyle(),
-      this.onChanged,
+    this.onChanged,
     this.inputFormatters,
     this.optionList,
-      this.onSubmitted,
-      this.onClean,
+    this.onSubmitted,
+    this.onClean,
   });
   final Color borderColor;
   final Color focusBorderColor;
@@ -591,16 +591,27 @@ class _SYTextFieldState extends State<SYTextField> {
                       onPressed: () {
                         if (textEditingController.text.isNotEmpty) {
                           widget.onSubmitted!(textEditingController.text);
+                        } else {
+                          if (widget.onClean != null) {
+                            widget.onClean!();
+                          }
                         }
                       },
                       icon: const Icon(Icons.check)),
             ),
-            onChanged: (dd) {
+            onSubmitted: (dd) {
               if (dd.isEmpty) {
                 if (widget.onClean != null) {
                   widget.onClean!();
                 }
               } else {
+                if (widget.onChanged != null) {
+                  widget.onSubmitted!(dd);
+                }
+              }
+            },
+            onChanged: (dd) {
+              if (dd.isNotEmpty) {
                 if (widget.onChanged != null) {
                   widget.onChanged!(dd);
                 }
@@ -609,6 +620,45 @@ class _SYTextFieldState extends State<SYTextField> {
           ),
         );
       },
+    );
+  }
+}
+
+class SySlideButton extends StatefulWidget {
+  const SySlideButton(
+      {super.key,
+      required this.text,
+      required this.onSlide,
+      required this.active});
+  final bool active;
+  final String text;
+  final Function() onSlide;
+  @override
+  State<SySlideButton> createState() => _SySlideButtonState();
+}
+
+class _SySlideButtonState extends State<SySlideButton> {
+  bool isFinished = false;
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: Alignment.center,
+      child: SwipeableButtonView(
+        isActive: widget.active,
+        buttonText: 'Slide to ${widget.text}',
+        buttontextstyle: const TextStyle(fontSize: 25, color: Colors.white),
+        buttonWidget:
+            const Icon(Icons.arrow_forward_ios_rounded, color: Colors.grey),
+        activeColor: const Color(0xFF009C41),
+        onWaitingProcess: () {
+          widget.onSlide();
+          // Future.delayed(const Duration(milliseconds: 300), () {
+          //   setState(() => isFinished = true);
+          // });
+        },
+        isFinished: isFinished,
+        onFinish: () async {},
+      ),
     );
   }
 }
