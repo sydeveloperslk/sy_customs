@@ -839,40 +839,132 @@ class Nav {
 }
 
 enum SYIconText {
-  lock,
-  duplicate,
-  idCard,
-  nic,
-  phone,
-  pob,
-  muslimMan,
-  muslimWoman,
-  newBar,
-  switchBar,
-  approved,
-  medal,
-  users,
-  edit,
-  allForm,
-  calendar,
-  bed,
-  cash,
-  noticeBoard,
-  googleMapColored,
-  danger,
-  verify,
-  empty,
-  star,
-  app,
-  map,
-  construction,
-  form,
-  thinking,
-  whatsapp,
-  noUpdate,
-  building,
-  newForm,
-  house,
+  pending('pending'),
+  rejected('rejected'),
+  lock('lock'),
+  duplicate('duplicate'),
+  idCard('idCard'),
+  nic('nic'),
+  phone('phone'),
+  pob('pob'),
+  muslimMan('muslimMan'),
+  muslimWoman('muslimWoman'),
+  newBar('newBar'),
+  switchBar('switchBar'),
+  approved('approved'),
+  medal('medal'),
+  users('users'),
+  edit('edit'),
+  allForm('allForm'),
+  calendar('calendar'),
+  bed('bed'),
+  cash('cash'),
+  noticeBoard('noticeBoard'),
+  googleMapColored('googleMapColored'),
+  danger('danger'),
+  verify('verify'),
+  empty('empty'),
+  star('star'),
+  app('app'),
+  map('map'),
+  construction('construction'),
+  form('form'),
+  thinking('thinking'),
+  whatsapp('whatsapp'),
+  noUpdate('noUpdate'),
+  building('building'),
+  newForm('newForm'),
+  customize('customize'),
+  house('house');
+
+  const SYIconText(this.status);
+
+  final String status;
+
+  @override
+  String toString() {
+    return status;
+  }
+
+  static SYIconText fromString(String? status) {
+    switch (status) {
+      case 'lock':
+        return SYIconText.lock;
+      case 'duplicate':
+        return SYIconText.duplicate;
+      case 'idCard':
+        return SYIconText.idCard;
+      case 'nic':
+        return SYIconText.nic;
+      case 'phone':
+        return SYIconText.phone;
+      case 'pob':
+        return SYIconText.pob;
+      case 'muslimMan':
+        return SYIconText.muslimMan;
+      case 'muslimWoman':
+        return SYIconText.muslimWoman;
+      case 'newBar':
+        return SYIconText.newBar;
+      case 'switchBar':
+        return SYIconText.switchBar;
+      case 'approved':
+        return SYIconText.approved;
+      case 'medal':
+        return SYIconText.medal;
+      case 'users':
+        return SYIconText.users;
+      case 'edit':
+        return SYIconText.edit;
+      case 'allForm':
+        return SYIconText.allForm;
+      case 'calendar':
+        return SYIconText.calendar;
+      case 'bed':
+        return SYIconText.bed;
+      case 'cash':
+        return SYIconText.cash;
+      case 'noticeBoard':
+        return SYIconText.noticeBoard;
+      case 'googleMapColored':
+        return SYIconText.googleMapColored;
+      case 'danger':
+        return SYIconText.danger;
+      case 'verify':
+        return SYIconText.verify;
+      case 'empty':
+        return SYIconText.empty;
+      case 'star':
+        return SYIconText.star;
+      case 'app':
+        return SYIconText.app;
+      case 'map':
+        return SYIconText.map;
+      case 'construction':
+        return SYIconText.construction;
+      case 'form':
+        return SYIconText.form;
+      case 'thinking':
+        return SYIconText.thinking;
+      case 'whatsapp':
+        return SYIconText.whatsapp;
+      case 'noUpdate':
+        return SYIconText.noUpdate;
+      case 'building':
+        return SYIconText.building;
+      case 'newForm':
+        return SYIconText.newForm;
+      case 'house':
+        return SYIconText.house;
+      case 'customize':
+        return SYIconText.customize;
+      case 'rejected':
+        return SYIconText.rejected;
+      case 'pending':
+        return SYIconText.pending;
+    }
+    return SYIconText.construction;
+  }
 }
 
 class SYIcon extends StatelessWidget {
@@ -883,6 +975,15 @@ class SYIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     String icon = 'packages/sy_customs/assets/icons/error.svg';
     switch (data) {
+      case SYIconText.rejected:
+        icon = 'packages/sy_customs/assets/svg/rejected.svg';
+        break;
+      case SYIconText.pending:
+        icon = 'packages/sy_customs/assets/svg/pending.svg';
+        break;
+      case SYIconText.customize:
+        icon = 'packages/sy_customs/assets/svg/customize.svg';
+        break;
       case SYIconText.phone:
         icon = 'packages/sy_customs/assets/svg/phone.svg';
         break;
