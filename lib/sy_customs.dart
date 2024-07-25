@@ -100,7 +100,7 @@ class _PageUnderConsState extends State<PageUnderCons> {
           mainAxisSize: MainAxisSize.min,
           children: [
             SYIcon(
-              data: "construction",
+              data: SYIconText.construction,
               size: 150,
             ),
             Gap(20),
@@ -229,89 +229,6 @@ String syRenameEmptyString(String data, String ifEmpty) {
   return data;
 }
 
-class GenderSelector extends StatelessWidget {
-  const GenderSelector(
-      {super.key,
-      required this.isMaleSelected,
-      required this.isMaleOld,
-      this.options = const TextStyle(fontFamily: 'raleway', fontSize: 20)});
-  final Function(bool) isMaleSelected;
-  final bool? isMaleOld;
-  final TextStyle? options;
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Row(
-          children: [
-            const Gap(20),
-            Text(
-              "Gender",
-              style: options,
-            ),
-            const Spacer(),
-            GestureDetector(
-              onTap: () {
-                isMaleSelected(true);
-              },
-              child: Card(
-                color: isMaleOld == true
-                    ? Colors.amber
-                    : const Color.fromARGB(255, 248, 226, 226),
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Row(
-                    children: [
-                      const SYIcon(
-                        data: "muslim_man",
-                        size: 33,
-                      ),
-                      const Gap(10),
-                      Text(
-                        "Male",
-                        style: options,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            GestureDetector(
-              onTap: () {
-                isMaleSelected(false);
-              },
-              child: Card(
-                color: isMaleOld == false
-                    ? Colors.amber
-                    : const Color.fromARGB(255, 248, 226, 226),
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Row(
-                    children: [
-                      const SYIcon(
-                        data: "muslim_woman",
-                        size: 33,
-                      ),
-                      const Gap(10),
-                      Text(
-                        "Female",
-                        style: options,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            const Spacer(),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 List<double> syListToDouble(List<String> data) {
   return data.map((e) => double.tryParse(e) ?? 0.0).toList();
 }
@@ -368,7 +285,6 @@ class _DateOfBirthSelectorState extends State<DateOfBirthSelector> {
         ? List<int>.generate(
             DateTime(selectedYear!, selectedMonth! + 1, 0).day, (i) => i + 1)
         : [];
-    initState() {}
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -472,7 +388,9 @@ class SYTextField extends StatefulWidget {
     this.optionList,
     this.onSubmitted,
     this.onClean,
+    this.focusNode,
   });
+
   final Color borderColor;
   final Color focusBorderColor;
   final List<TextInputFormatter>? inputFormatters;
@@ -483,6 +401,7 @@ class SYTextField extends StatefulWidget {
   final Function(String)? onChanged;
   final Function()? onClean;
   final Function(String)? onSubmitted;
+  final FocusNode? focusNode;
 
   @override
   State<SYTextField> createState() => _SYTextFieldState();
@@ -490,6 +409,7 @@ class SYTextField extends StatefulWidget {
 
 class _SYTextFieldState extends State<SYTextField> {
   String goingToAdd = "";
+
   @override
   Widget build(BuildContext context) {
     return Autocomplete<String>(
@@ -564,12 +484,13 @@ class _SYTextFieldState extends State<SYTextField> {
         if (widget.old != null) {
           textEditingController.text = widget.old!;
         }
+
         return Padding(
           padding: const EdgeInsets.all(8.0),
           child: TextField(
             controller: textEditingController,
             inputFormatters: widget.inputFormatters,
-            focusNode: focusNode,
+            focusNode: widget.focusNode ?? focusNode,
             decoration: InputDecoration(
               enabledBorder: OutlineInputBorder(
                 borderSide: BorderSide(color: widget.borderColor, width: 2.0),
@@ -614,6 +535,10 @@ class _SYTextFieldState extends State<SYTextField> {
               if (dd.isNotEmpty) {
                 if (widget.onChanged != null) {
                   widget.onChanged!(dd);
+                }
+              } else {
+                if (widget.onClean != null) {
+                  widget.onClean!();
                 }
               }
             },
@@ -913,121 +838,161 @@ class Nav {
   }
 }
 
+enum SYIconText {
+  lock,
+  duplicate,
+  idCard,
+  nic,
+  phone,
+  pob,
+  muslimMan,
+  muslimWoman,
+  newBar,
+  switchBar,
+  approved,
+  medal,
+  users,
+  edit,
+  allForm,
+  calendar,
+  bed,
+  cash,
+  noticeBoard,
+  googleMapColored,
+  danger,
+  verify,
+  empty,
+  star,
+  app,
+  map,
+  construction,
+  form,
+  thinking,
+  whatsapp,
+  noUpdate,
+  building,
+  newForm,
+  house,
+}
+
 class SYIcon extends StatelessWidget {
   const SYIcon({super.key, required this.data, this.size = 30});
-  final String data;
+  final SYIconText data;
   final double size;
   @override
   Widget build(BuildContext context) {
     String icon = 'packages/sy_customs/assets/icons/error.svg';
-    switch (data.toLowerCase()) {
-      case "lock":
-        icon = 'packages/sy_customs/assets/svg/lock.svg';
+    switch (data) {
+      case SYIconText.phone:
+        icon = 'packages/sy_customs/assets/svg/phone.svg';
         break;
-      case "medal":
-        icon = 'packages/sy_customs/assets/svg/medal.svg';
+      case SYIconText.pob:
+        icon = 'packages/sy_customs/assets/svg/pob.svg';
         break;
-      case "danger":
-        icon = 'packages/sy_customs/assets/svg/danger.svg';
+      case SYIconText.idCard:
+        icon = 'packages/sy_customs/assets/svg/id_card.svg';
         break;
-      case "verify":
-        icon = 'packages/sy_customs/assets/svg/ver.svg';
-        break;
-      case "star":
-        icon = 'packages/sy_customs/assets/svg/star.svg';
-        break;
-      case "empty":
-        icon = 'packages/sy_customs/assets/svg/empty.svg';
-        break;
-      case "app":
-        icon = 'packages/sy_customs/assets/svg/playStore.svg';
-        break;
-      case "map":
-        icon = 'packages/sy_customs/assets/svg/map.svg';
-        break;
-      case "construction":
-        icon = 'packages/sy_customs/assets/svg/construction.svg';
-        break;
-      case "whatsapp":
-        icon = 'packages/sy_customs/assets/svg/whatsapp.svg';
-        break;
-      case "no_update":
-        icon = 'packages/sy_customs/assets/svg/no_update.svg';
-        break;
-      case "thinking":
-        icon = 'packages/sy_customs/assets/svg/thinking.svg';
-        break;
-      case "form":
-        icon = 'packages/sy_customs/assets/svg/form.svg';
-        break;
-      case "new_form":
-        icon = 'packages/sy_customs/assets/svg/new_form.svg';
-        break;
-      case "house":
-        icon = 'packages/sy_customs/assets/svg/house.svg';
-        break;
-      case "building":
-        icon = 'packages/sy_customs/assets/svg/building.svg';
-        break;
-      case "all_form":
-        icon = 'packages/sy_customs/assets/svg/all_form.svg';
-        break;
-      case "edit":
-        icon = 'packages/sy_customs/assets/svg/edit.svg';
-        break;
-      case "users":
-        icon = 'packages/sy_customs/assets/svg/users.svg';
-        break;
-      case "cash":
-        icon = 'packages/sy_customs/assets/svg/cash.svg';
-        break;
-      case "bed":
-        icon = 'packages/sy_customs/assets/svg/bed.svg';
-        break;
-      case "notice_board":
-        icon = 'packages/sy_customs/assets/svg/notice_board.svg';
-        break;
-      case "calendar":
-        icon = 'packages/sy_customs/assets/svg/calendar.svg';
-        break;
-      case "google_map_colored":
-        icon = 'packages/sy_customs/assets/svg/google_map_colored.svg';
+      case SYIconText.nic:
+        icon = 'packages/sy_customs/assets/svg/nic.svg';
         break;
 
-      case "muslim_man":
+      case SYIconText.duplicate:
+        icon = 'packages/sy_customs/assets/svg/duplicate.svg';
+        break;
+      case SYIconText.lock:
+        icon = 'packages/sy_customs/assets/svg/lock.svg';
+        break;
+      case SYIconText.medal:
+        icon = 'packages/sy_customs/assets/svg/medal.svg';
+        break;
+      case SYIconText.danger:
+        icon = 'packages/sy_customs/assets/svg/danger.svg';
+        break;
+      case SYIconText.verify:
+        icon = 'packages/sy_customs/assets/svg/ver.svg';
+        break;
+      case SYIconText.star:
+        icon = 'packages/sy_customs/assets/svg/star.svg';
+        break;
+      case SYIconText.empty:
+        icon = 'packages/sy_customs/assets/svg/empty.svg';
+        break;
+      case SYIconText.app:
+        icon = 'packages/sy_customs/assets/svg/playStore.svg';
+        break;
+      case SYIconText.map:
+        icon = 'packages/sy_customs/assets/svg/map.svg';
+        break;
+      case SYIconText.construction:
+        icon = 'packages/sy_customs/assets/svg/construction.svg';
+        break;
+      case SYIconText.whatsapp:
+        icon = 'packages/sy_customs/assets/svg/whatsapp.svg';
+        break;
+      case SYIconText.noUpdate:
+        icon = 'packages/sy_customs/assets/svg/no_update.svg';
+        break;
+      case SYIconText.thinking:
+        icon = 'packages/sy_customs/assets/svg/thinking.svg';
+        break;
+      case SYIconText.form:
+        icon = 'packages/sy_customs/assets/svg/form.svg';
+        break;
+      case SYIconText.newForm:
+        icon = 'packages/sy_customs/assets/svg/new_form.svg';
+        break;
+      case SYIconText.house:
+        icon = 'packages/sy_customs/assets/svg/house.svg';
+        break;
+      case SYIconText.building:
+        icon = 'packages/sy_customs/assets/svg/building.svg';
+        break;
+      case SYIconText.allForm:
+        icon = 'packages/sy_customs/assets/svg/all_form.svg';
+        break;
+      case SYIconText.edit:
+        icon = 'packages/sy_customs/assets/svg/edit.svg';
+        break;
+      case SYIconText.users:
+        icon = 'packages/sy_customs/assets/svg/users.svg';
+        break;
+      case SYIconText.cash:
+        icon = 'packages/sy_customs/assets/svg/cash.svg';
+        break;
+      case SYIconText.bed:
+        icon = 'packages/sy_customs/assets/svg/bed.svg';
+        break;
+      case SYIconText.noticeBoard:
+        icon = 'packages/sy_customs/assets/svg/notice_board.svg';
+        break;
+      case SYIconText.calendar:
+        icon = 'packages/sy_customs/assets/svg/calendar.svg';
+        break;
+      case SYIconText.googleMapColored:
+        icon = 'packages/sy_customs/assets/svg/google_map_colored.svg';
+        break;
+      case SYIconText.muslimMan:
         icon = 'packages/sy_customs/assets/svg/muslim_man.svg';
         break;
-      case "muslim_woman":
+      case SYIconText.muslimWoman:
         icon = 'packages/sy_customs/assets/svg/muslim_woman.svg';
         break;
-      case "new":
+      case SYIconText.newBar:
         icon = 'packages/sy_customs/assets/svg/new.svg';
         break;
-      case "switch":
+      case SYIconText.switchBar:
         icon = 'packages/sy_customs/assets/svg/switch.svg';
         break;
-      case "approved":
+      case SYIconText.approved:
         icon = 'packages/sy_customs/assets/svg/approved.svg';
         break;
-      case "approved":
+      case SYIconText.approved:
         icon = 'packages/sy_customs/assets/svg/approved.svg';
         break;
-      case "approved":
+      case SYIconText.approved:
         icon = 'packages/sy_customs/assets/svg/approved.svg';
         break;
-      case "approved":
-        icon = 'packages/sy_customs/assets/svg/approved.svg';
-        break;
-      case "approved":
-        icon = 'packages/sy_customs/assets/svg/approved.svg';
-        break;
-      case "approved":
-        icon = 'packages/sy_customs/assets/svg/approved.svg';
-        break;
-      case "approved":
-        icon = 'packages/sy_customs/assets/svg/approved.svg';
-        break;
-      case "rejected":
+      case SYIconText.approved:
         icon = 'packages/sy_customs/assets/svg/rejected.svg';
         break;
     }
