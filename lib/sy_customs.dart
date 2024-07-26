@@ -387,8 +387,10 @@ class SYTextField extends StatefulWidget {
     this.inputFormatters,
     this.optionList,
     this.onSubmitted,
+    this.selectedFromList,
     this.onClean,
     this.focusNode,
+    this.isOnlySelectable = false,
   });
 
   final Color borderColor;
@@ -401,7 +403,9 @@ class SYTextField extends StatefulWidget {
   final Function(String)? onChanged;
   final Function()? onClean;
   final Function(String)? onSubmitted;
+  final Function(String)? selectedFromList;
   final FocusNode? focusNode;
+  final bool isOnlySelectable;
 
   @override
   State<SYTextField> createState() => _SYTextFieldState();
@@ -424,7 +428,8 @@ class _SYTextFieldState extends State<SYTextField> {
               .contains(textEditingValue.text.toLowerCase());
         }).toList();
         if (textEditingValue.text.isNotEmpty &&
-            !h.contains(textEditingValue.text.toLowerCase())) {
+            !h.contains(textEditingValue.text.toLowerCase()) &&
+            !widget.isOnlySelectable) {
           h.add(textEditingValue.text.toLowerCase());
           goingToAdd = textEditingValue.text.toLowerCase();
         } else {
@@ -475,6 +480,9 @@ class _SYTextFieldState extends State<SYTextField> {
       onSelected: (dd) {
         if (widget.onSubmitted != null) {
           widget.onSubmitted!(dd);
+        }
+        if (widget.selectedFromList != null) {
+          widget.selectedFromList!(dd);
         }
       },
       fieldViewBuilder: (BuildContext context,
@@ -839,6 +847,8 @@ class Nav {
 }
 
 enum SYIconText {
+  personRelation('personRelation'),
+  fingerPrint('fingerPrint'),
   pending('pending'),
   rejected('rejected'),
   lock('lock'),
@@ -875,6 +885,7 @@ enum SYIconText {
   building('building'),
   newForm('newForm'),
   customize('customize'),
+  gender('gender'),
   house('house');
 
   const SYIconText(this.status);
@@ -938,6 +949,8 @@ enum SYIconText {
         return SYIconText.star;
       case 'app':
         return SYIconText.app;
+      case 'gender':
+        return SYIconText.gender;
       case 'map':
         return SYIconText.map;
       case 'construction':
@@ -962,6 +975,10 @@ enum SYIconText {
         return SYIconText.rejected;
       case 'pending':
         return SYIconText.pending;
+      case 'personRelation':
+        return SYIconText.personRelation;
+      case 'fingerPrint':
+        return SYIconText.fingerPrint;
     }
     return SYIconText.construction;
   }
@@ -975,6 +992,9 @@ class SYIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     String icon = 'packages/sy_customs/assets/icons/error.svg';
     switch (data) {
+      case SYIconText.personRelation:
+        icon = 'packages/sy_customs/assets/svg/personRelation.svg';
+        break;
       case SYIconText.rejected:
         icon = 'packages/sy_customs/assets/svg/rejected.svg';
         break;
@@ -987,8 +1007,13 @@ class SYIcon extends StatelessWidget {
       case SYIconText.phone:
         icon = 'packages/sy_customs/assets/svg/phone.svg';
         break;
+      case SYIconText.fingerPrint:
+        icon = 'packages/sy_customs/assets/svg/fingerPrint.svg';
       case SYIconText.pob:
         icon = 'packages/sy_customs/assets/svg/pob.svg';
+        break;
+      case SYIconText.gender:
+        icon = 'packages/sy_customs/assets/svg/gender.svg';
         break;
       case SYIconText.idCard:
         icon = 'packages/sy_customs/assets/svg/id_card.svg';
@@ -996,7 +1021,6 @@ class SYIcon extends StatelessWidget {
       case SYIconText.nic:
         icon = 'packages/sy_customs/assets/svg/nic.svg';
         break;
-
       case SYIconText.duplicate:
         icon = 'packages/sy_customs/assets/svg/duplicate.svg';
         break;
