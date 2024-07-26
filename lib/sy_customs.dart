@@ -864,6 +864,7 @@ enum SYIconText {
   approved('approved'),
   medal('medal'),
   users('users'),
+  masjith('masjith'),
   edit('edit'),
   allForm('allForm'),
   calendar('calendar'),
@@ -877,11 +878,14 @@ enum SYIconText {
   star('star'),
   app('app'),
   map('map'),
+  yeezzLogo('yeezzLogo'),
+  go('go'),
   construction('construction'),
   form('form'),
   thinking('thinking'),
   whatsapp('whatsapp'),
   noUpdate('noUpdate'),
+  send('send'),
   building('building'),
   newForm('newForm'),
   customize('customize'),
@@ -899,10 +903,14 @@ enum SYIconText {
 
   static SYIconText fromString(String? status) {
     switch (status) {
+      case 'masjith':
+        return SYIconText.masjith;
       case 'lock':
         return SYIconText.lock;
       case 'duplicate':
         return SYIconText.duplicate;
+      case 'go':
+        return SYIconText.go;
       case 'idCard':
         return SYIconText.idCard;
       case 'nic':
@@ -979,6 +987,10 @@ enum SYIconText {
         return SYIconText.personRelation;
       case 'fingerPrint':
         return SYIconText.fingerPrint;
+      case 'yeezzLogo':
+        return SYIconText.yeezzLogo;
+      case 'send':
+        return SYIconText.send;
     }
     return SYIconText.construction;
   }
@@ -994,6 +1006,15 @@ class SYIcon extends StatelessWidget {
     switch (data) {
       case SYIconText.personRelation:
         icon = 'packages/sy_customs/assets/svg/personRelation.svg';
+        break;
+      case SYIconText.send:
+        icon = 'packages/sy_customs/assets/svg/send.svg';
+        break;
+      case SYIconText.masjith:
+        icon = 'packages/sy_customs/assets/svg/masjith.svg';
+        break;
+      case SYIconText.go:
+        icon = 'packages/sy_customs/assets/svg/go.svg';
         break;
       case SYIconText.rejected:
         icon = 'packages/sy_customs/assets/svg/rejected.svg';
@@ -1111,14 +1132,8 @@ class SYIcon extends StatelessWidget {
       case SYIconText.approved:
         icon = 'packages/sy_customs/assets/svg/approved.svg';
         break;
-      case SYIconText.approved:
-        icon = 'packages/sy_customs/assets/svg/approved.svg';
-        break;
-      case SYIconText.approved:
-        icon = 'packages/sy_customs/assets/svg/approved.svg';
-        break;
-      case SYIconText.approved:
-        icon = 'packages/sy_customs/assets/svg/rejected.svg';
+      case SYIconText.yeezzLogo:
+        icon = 'packages/sy_customs/assets/svg/yeezzLogo.svg';
         break;
     }
     return SvgPicture.asset(
