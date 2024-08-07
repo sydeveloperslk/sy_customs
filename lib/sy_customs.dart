@@ -29,9 +29,9 @@ List<String> syStringToList(String? data, int length) {
   return words;
 }
 
-Future<bool?> syConfirmPopUp(BuildContext context, String title, String content,
+Future<bool> syConfirmPopUp(BuildContext context, String title, String content,
     {String? boldString, String? no, String? yes, Color? boldColor}) async {
-  return showDialog(
+  bool? e = await showDialog(
     context: context,
     builder: (context) {
       return AlertDialog(
@@ -81,6 +81,7 @@ Future<bool?> syConfirmPopUp(BuildContext context, String title, String content,
       );
     },
   );
+  return e ?? false;
 }
 
 class PageUnderCons extends StatefulWidget {
@@ -153,14 +154,14 @@ String syListToString(List<String> data) {
   return data.join();
 }
 
-Future<bool?> syPreviewConfirmPopUp(
+Future<bool> syPreviewConfirmPopUp(
     BuildContext context, String title, String content,
     {String? boldString,
     String? no,
     String? yes,
     Color? boldColor,
     Widget? sample}) async {
-  return showDialog(
+  bool? d = await showDialog(
     context: context,
     builder: (context) {
       return AlertDialog(
@@ -220,6 +221,7 @@ Future<bool?> syPreviewConfirmPopUp(
       );
     },
   );
+  return d ?? false;
 }
 
 String syRenameEmptyString(String data, String ifEmpty) {
@@ -383,12 +385,12 @@ class SYTextField extends StatefulWidget {
     required this.label,
     this.old,
     this.textStyle = const TextStyle(),
-    this.onChanged,
+    required this.onChanged,
     this.inputFormatters,
     this.optionList,
     this.onSubmitted,
     this.selectedFromList,
-    this.onClean,
+    required this.onClean,
     this.focusNode,
     this.isOnlySelectable = false,
   });
@@ -400,8 +402,8 @@ class SYTextField extends StatefulWidget {
   final String label;
   final String? old;
   final TextStyle textStyle;
-  final Function(String)? onChanged;
-  final Function()? onClean;
+  final Function(String) onChanged;
+  final Function() onClean;
   final Function(String)? onSubmitted;
   final Function(String)? selectedFromList;
   final FocusNode? focusNode;
@@ -462,7 +464,7 @@ class _SYTextFieldState extends State<SYTextField> {
                                   context,
                                   "Conform Add",
                                   "Do you need to add new value $option");
-                              if (c != null && c) {
+                              if (c) {
                                 onSelected(option);
                               }
                             } else {
@@ -521,33 +523,23 @@ class _SYTextFieldState extends State<SYTextField> {
                         if (textEditingController.text.isNotEmpty) {
                           widget.onSubmitted!(textEditingController.text);
                         } else {
-                          if (widget.onClean != null) {
-                            widget.onClean!();
-                          }
+                          widget.onClean();
                         }
                       },
                       icon: const Icon(Icons.check)),
             ),
             onSubmitted: (dd) {
               if (dd.isEmpty) {
-                if (widget.onClean != null) {
-                  widget.onClean!();
-                }
+                widget.onClean();
               } else {
-                if (widget.onChanged != null) {
-                  widget.onSubmitted!(dd);
-                }
+                widget.onSubmitted!(dd);
               }
             },
             onChanged: (dd) {
               if (dd.isNotEmpty) {
-                if (widget.onChanged != null) {
-                  widget.onChanged!(dd);
-                }
+                widget.onChanged(dd);
               } else {
-                if (widget.onClean != null) {
-                  widget.onClean!();
-                }
+                widget.onClean();
               }
             },
           ),
@@ -864,7 +856,8 @@ enum SYIconText {
   approved('approved'),
   medal('medal'),
   users('users'),
-  masjith('masjith'),
+  masjid('masjid'),
+  masjid_2('masjid_2'),
   edit('edit'),
   allForm('allForm'),
   calendar('calendar'),
@@ -884,10 +877,14 @@ enum SYIconText {
   form('form'),
   thinking('thinking'),
   whatsapp('whatsapp'),
+  list('list'),
   noUpdate('noUpdate'),
   send('send'),
+  analysis('analysis'),
   building('building'),
+  chat('chat'),
   newForm('newForm'),
+  pdf('pdf'),
   customize('customize'),
   gender('gender'),
   house('house');
@@ -903,8 +900,14 @@ enum SYIconText {
 
   static SYIconText fromString(String? status) {
     switch (status) {
-      case 'masjith':
-        return SYIconText.masjith;
+      case 'pdf':
+        return SYIconText.pdf;
+      case 'masjid_2':
+        return SYIconText.masjid_2;
+      case 'analysis':
+        return SYIconText.analysis;
+      case 'masjid':
+        return SYIconText.masjid;
       case 'lock':
         return SYIconText.lock;
       case 'duplicate':
@@ -989,8 +992,12 @@ enum SYIconText {
         return SYIconText.fingerPrint;
       case 'yeezzLogo':
         return SYIconText.yeezzLogo;
+      case 'chat':
+        return SYIconText.chat;
       case 'send':
         return SYIconText.send;
+      case 'list':
+        return SYIconText.list;
     }
     return SYIconText.construction;
   }
@@ -1004,14 +1011,24 @@ class SYIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     String icon = 'packages/sy_customs/assets/icons/error.svg';
     switch (data) {
+      case SYIconText.chat:
+        icon = 'packages/sy_customs/assets/svg/chat.svg';
+      case SYIconText.masjid_2:
+        icon = 'packages/sy_customs/assets/svg/masjid_2.svg';
+      case SYIconText.list:
+        icon = 'packages/sy_customs/assets/svg/list.svg';
+      case SYIconText.pdf:
+        icon = 'packages/sy_customs/assets/svg/pdf.svg';
+      case SYIconText.analysis:
+        icon = 'packages/sy_customs/assets/svg/analysis.svg';
       case SYIconText.personRelation:
         icon = 'packages/sy_customs/assets/svg/personRelation.svg';
         break;
       case SYIconText.send:
         icon = 'packages/sy_customs/assets/svg/send.svg';
         break;
-      case SYIconText.masjith:
-        icon = 'packages/sy_customs/assets/svg/masjith.svg';
+      case SYIconText.masjid:
+        icon = 'packages/sy_customs/assets/svg/masjid.svg';
         break;
       case SYIconText.go:
         icon = 'packages/sy_customs/assets/svg/go.svg';
