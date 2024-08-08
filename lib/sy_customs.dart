@@ -841,6 +841,10 @@ class Nav {
 enum SYIconText {
   personRelation('personRelation'),
   fingerPrint('fingerPrint'),
+  notification('notification'),
+  invoice('invoice'),
+  request('request'),
+  more('more'),
   pending('pending'),
   rejected('rejected'),
   lock('lock'),
@@ -885,6 +889,7 @@ enum SYIconText {
   chat('chat'),
   newForm('newForm'),
   pdf('pdf'),
+  accounts('accounts'),
   customize('customize'),
   gender('gender'),
   house('house');
@@ -900,16 +905,24 @@ enum SYIconText {
 
   static SYIconText fromString(String? status) {
     switch (status) {
+      case 'accounts':
+        return SYIconText.accounts;
       case 'pdf':
         return SYIconText.pdf;
       case 'masjid_2':
         return SYIconText.masjid_2;
+      case 'invoice':
+        return SYIconText.invoice;
       case 'analysis':
         return SYIconText.analysis;
+      case 'notification':
+        return SYIconText.notification;
       case 'masjid':
         return SYIconText.masjid;
       case 'lock':
         return SYIconText.lock;
+      case 'more':
+        return SYIconText.more;
       case 'duplicate':
         return SYIconText.duplicate;
       case 'go':
@@ -940,6 +953,8 @@ enum SYIconText {
         return SYIconText.edit;
       case 'allForm':
         return SYIconText.allForm;
+      case 'request':
+        return SYIconText.request;
       case 'calendar':
         return SYIconText.calendar;
       case 'bed':
@@ -1011,6 +1026,16 @@ class SYIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     String icon = 'packages/sy_customs/assets/icons/error.svg';
     switch (data) {
+      case SYIconText.notification:
+        icon = 'packages/sy_customs/assets/svg/notification.svg';
+      case SYIconText.more:
+        icon = 'packages/sy_customs/assets/svg/more.svg';
+      case SYIconText.invoice:
+        icon = 'packages/sy_customs/assets/svg/invoice.svg';
+      case SYIconText.request:
+        icon = 'packages/sy_customs/assets/svg/request.svg';
+      case SYIconText.accounts:
+        icon = 'packages/sy_customs/assets/svg/accounts.svg';
       case SYIconText.chat:
         icon = 'packages/sy_customs/assets/svg/chat.svg';
       case SYIconText.masjid_2:
