@@ -6,6 +6,7 @@ import 'package:gap/gap.dart';
 import 'package:flutter/foundation.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:swipeable_button_view/swipeable_button_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -418,6 +419,17 @@ class _SYTextFieldState extends State<SYTextField> {
 
   @override
   Widget build(BuildContext context) {
+    Color borderColor;
+    Color focusBorderColor;
+    bool isDarkMode =
+        MediaQuery.of(context).platformBrightness == Brightness.dark;
+    if (isDarkMode) {
+      borderColor = Colors.white;
+      focusBorderColor = Colors.white;
+    } else {
+      borderColor = Colors.white;
+      focusBorderColor = Colors.white;
+    }
     return Autocomplete<String>(
       optionsBuilder: (TextEditingValue textEditingValue) {
         if (widget.optionList == null) {
@@ -503,11 +515,10 @@ class _SYTextFieldState extends State<SYTextField> {
             focusNode: widget.focusNode ?? focusNode,
             decoration: InputDecoration(
               enabledBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: widget.borderColor, width: 2.0),
+                borderSide: BorderSide(color: borderColor, width: 2.0),
               ),
               focusedBorder: OutlineInputBorder(
-                borderSide:
-                    BorderSide(color: widget.focusBorderColor, width: 2.0),
+                borderSide: BorderSide(color: focusBorderColor, width: 2.0),
               ),
               errorBorder: const OutlineInputBorder(
                 borderSide: BorderSide(color: Colors.red, width: 2.0),
@@ -532,7 +543,9 @@ class _SYTextFieldState extends State<SYTextField> {
               if (dd.isEmpty) {
                 widget.onClean();
               } else {
-                widget.onSubmitted!(dd);
+                if (widget.onSubmitted != null) {
+                  widget.onSubmitted!(dd);
+                }
               }
             },
             onChanged: (dd) {
@@ -880,6 +893,7 @@ enum SYIconText {
   construction('construction'),
   form('form'),
   thinking('thinking'),
+  chicken('chicken'),
   whatsapp('whatsapp'),
   list('list'),
   noUpdate('noUpdate'),
@@ -985,6 +999,8 @@ enum SYIconText {
         return SYIconText.form;
       case 'thinking':
         return SYIconText.thinking;
+      case 'chicken':
+        return SYIconText.chicken;
       case 'whatsapp':
         return SYIconText.whatsapp;
       case 'noUpdate':
@@ -1123,6 +1139,9 @@ class SYIcon extends StatelessWidget {
       case SYIconText.thinking:
         icon = 'packages/sy_customs/assets/svg/thinking.svg';
         break;
+      case SYIconText.chicken:
+        icon = 'packages/sy_customs/assets/svg/chicken.svg';
+        break;
       case SYIconText.form:
         icon = 'packages/sy_customs/assets/svg/form.svg';
         break;
@@ -1220,5 +1239,68 @@ class SYHexColor extends Color {
       hexColor = 'FF$hexColor';
     }
     return int.parse(hexColor, radix: 16);
+  }
+}
+
+Widget gap(double data) {
+  return Gap(data);
+}
+
+class SYCache {
+
+   static Future<void> clearCache(String key, String value) async {
+    final prefs = await SharedPreferences.getInstance();
+      await prefs.clear();   
+  } 
+  // Save or Update Data
+ static Future<void> updateString(String key, String value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(key, value); // Overwrites if the key already exists
+  }
+
+  // Delete Data
+static  Future<void> deleteVariable(String key) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(key);
+  }
+
+  // Retrieve Data
+ static Future<String?> getString(String key) async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(key);
+  }
+
+  // Check if a key exists
+ static Future<bool> containsKey(String key) async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.containsKey(key);
+  }
+
+ static Future<void> updateStringList(String key, List<String> value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList(
+        key, value); // Overwrites if the key already exists
+  }
+
+  // Retrieve a String List
+ static Future<List<String>?> getStringList(String key) async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getStringList(key);
+  }
+
+  // Add an item to a String List
+ static Future<void> addItemToList(String key, String value) async {
+    final prefs = await SharedPreferences.getInstance();
+    final currentList = prefs.getStringList(key) ?? [];
+    currentList.add(value);
+    await prefs.setStringList(key, currentList);
+  }
+
+  // Remove an item from a String List
+ static Future<void> removeItemFromList(String key, String value) async {
+    final prefs = await SharedPreferences.getInstance();
+    final currentList = prefs.getStringList(key) ?? [];
+    currentList.remove(value);
+    await prefs.setStringList(key, currentList);
   }
 }
