@@ -822,12 +822,13 @@ void syShowToast(BuildContext context, String text) {
 }
 
 class Nav {
-  static void navigateTo(BuildContext context, Widget screen) {
-    Navigator.push<dynamic>(
-        context,
-        MaterialPageRoute<dynamic>(
-          builder: (BuildContext context) => screen,
-        ));
+  static Future<T?> navigateTo<T>(BuildContext context, Widget screen) {
+    return Navigator.push<T>(
+      context,
+      MaterialPageRoute<T>(
+        builder: (BuildContext context) => screen,
+      ),
+    );
   }
 
   static void pushRe(BuildContext context, Widget screen) {
@@ -862,6 +863,12 @@ enum SYIconText {
   rejected('rejected'),
   lock('lock'),
   duplicate('duplicate'),
+  sale('sale'),
+  lorryLoading('lorryLoading'),
+  egg('egg'),
+  eggs('eggs'),
+  lorry('lorry'),
+  eggBroken('eggBroken'),
   idCard('idCard'),
   nic('nic'),
   phone('phone'),
@@ -939,6 +946,18 @@ enum SYIconText {
         return SYIconText.more;
       case 'duplicate':
         return SYIconText.duplicate;
+      case 'lorryLoading':
+        return SYIconText.lorryLoading;
+      case 'sale':
+        return SYIconText.sale;
+      case 'lorry':
+        return SYIconText.lorry;
+      case 'eggs':
+        return SYIconText.eggs;
+      case 'egg':
+        return SYIconText.egg;
+      case 'eggBroken':
+        return SYIconText.eggBroken;
       case 'go':
         return SYIconText.go;
       case 'idCard':
@@ -1103,6 +1122,24 @@ class SYIcon extends StatelessWidget {
       case SYIconText.duplicate:
         icon = 'packages/sy_customs/assets/svg/duplicate.svg';
         break;
+      case SYIconText.lorryLoading:
+        icon = 'packages/sy_customs/assets/svg/lorryLoading.svg';
+        break;
+      case SYIconText.sale:
+        icon = 'packages/sy_customs/assets/svg/sale.svg';
+        break;
+      case SYIconText.lorry:
+        icon = 'packages/sy_customs/assets/svg/lorry.svg';
+        break;
+      case SYIconText.egg:
+        icon = 'packages/sy_customs/assets/svg/egg.svg';
+        break;
+      case SYIconText.eggs:
+        icon = 'packages/sy_customs/assets/svg/eggs.svg';
+        break;
+      case SYIconText.eggBroken:
+        icon = 'packages/sy_customs/assets/svg/eggBroken.svg';
+        break;
       case SYIconText.lock:
         icon = 'packages/sy_customs/assets/svg/lock.svg';
         break;
@@ -1247,49 +1284,49 @@ Widget gap(double data) {
 }
 
 class SYCache {
-
-   static Future<void> clearCache(String key, String value) async {
+  static Future<void> clearCache() async {
     final prefs = await SharedPreferences.getInstance();
-      await prefs.clear();   
-  } 
+    await prefs.clear();
+  }
+
   // Save or Update Data
- static Future<void> updateString(String key, String value) async {
+  static Future<void> updateString(String key, String value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(key, value); // Overwrites if the key already exists
   }
 
   // Delete Data
-static  Future<void> deleteVariable(String key) async {
+  static Future<void> deleteVariable(String key) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(key);
   }
 
   // Retrieve Data
- static Future<String?> getString(String key) async {
+  static Future<String?> getString(String key) async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString(key);
   }
 
   // Check if a key exists
- static Future<bool> containsKey(String key) async {
+  static Future<bool> containsKey(String key) async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.containsKey(key);
   }
 
- static Future<void> updateStringList(String key, List<String> value) async {
+  static Future<void> updateStringList(String key, List<String> value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setStringList(
         key, value); // Overwrites if the key already exists
   }
 
   // Retrieve a String List
- static Future<List<String>?> getStringList(String key) async {
+  static Future<List<String>?> getStringList(String key) async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getStringList(key);
   }
 
   // Add an item to a String List
- static Future<void> addItemToList(String key, String value) async {
+  static Future<void> addItemToList(String key, String value) async {
     final prefs = await SharedPreferences.getInstance();
     final currentList = prefs.getStringList(key) ?? [];
     currentList.add(value);
@@ -1297,7 +1334,7 @@ static  Future<void> deleteVariable(String key) async {
   }
 
   // Remove an item from a String List
- static Future<void> removeItemFromList(String key, String value) async {
+  static Future<void> removeItemFromList(String key, String value) async {
     final prefs = await SharedPreferences.getInstance();
     final currentList = prefs.getStringList(key) ?? [];
     currentList.remove(value);
