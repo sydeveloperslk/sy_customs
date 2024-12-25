@@ -563,11 +563,14 @@ class _SYTextFieldState extends State<SYTextField> {
 }
 
 class SySlideButton extends StatefulWidget {
-  const SySlideButton(
-      {super.key,
-      required this.text,
-      required this.onSlide,
-      required this.active});
+  const SySlideButton({
+    super.key,
+    required this.text,
+    this.fontSize = 15,
+    required this.onSlide,
+    required this.active,
+  });
+  final double fontSize;
   final bool active;
   final String text;
   final Function() onSlide;
@@ -584,15 +587,16 @@ class _SySlideButtonState extends State<SySlideButton> {
       child: SwipeableButtonView(
         isActive: widget.active,
         buttonText: 'Slide to ${widget.text}',
-        buttontextstyle: const TextStyle(fontSize: 25, color: Colors.white),
+        buttontextstyle:
+            TextStyle(fontSize: widget.fontSize, color: Colors.white),
         buttonWidget:
             const Icon(Icons.arrow_forward_ios_rounded, color: Colors.grey),
         activeColor: const Color(0xFF009C41),
-        onWaitingProcess: () {
-          widget.onSlide();
-          // Future.delayed(const Duration(milliseconds: 300), () {
-          //   setState(() => isFinished = true);
-          // });
+        onWaitingProcess: () async {
+          await widget.onSlide();
+          Future.delayed(const Duration(milliseconds: 300), () {
+            setState(() => isFinished = true);
+          });
         },
         isFinished: isFinished,
         onFinish: () async {},
@@ -863,10 +867,13 @@ enum SYIconText {
   rejected('rejected'),
   lock('lock'),
   duplicate('duplicate'),
+  cage('cage'),
   sale('sale'),
   lorryLoading('lorryLoading'),
   egg('egg'),
-  eggs('eggs'),
+  box('box'),
+  eggTray('eggTray'),
+  store('store'),
   lorry('lorry'),
   eggBroken('eggBroken'),
   idCard('idCard'),
@@ -946,18 +953,24 @@ enum SYIconText {
         return SYIconText.more;
       case 'duplicate':
         return SYIconText.duplicate;
+      case 'cage':
+        return SYIconText.cage;
       case 'lorryLoading':
         return SYIconText.lorryLoading;
       case 'sale':
         return SYIconText.sale;
       case 'lorry':
         return SYIconText.lorry;
-      case 'eggs':
-        return SYIconText.eggs;
+      case 'store':
+        return SYIconText.store;
       case 'egg':
         return SYIconText.egg;
       case 'eggBroken':
         return SYIconText.eggBroken;
+      case 'eggTray':
+        return SYIconText.eggTray;
+      case 'box':
+        return SYIconText.box;
       case 'go':
         return SYIconText.go;
       case 'idCard':
@@ -1122,6 +1135,9 @@ class SYIcon extends StatelessWidget {
       case SYIconText.duplicate:
         icon = 'packages/sy_customs/assets/svg/duplicate.svg';
         break;
+      case SYIconText.cage:
+        icon = 'packages/sy_customs/assets/svg/cage.svg';
+        break;
       case SYIconText.lorryLoading:
         icon = 'packages/sy_customs/assets/svg/lorryLoading.svg';
         break;
@@ -1134,11 +1150,17 @@ class SYIcon extends StatelessWidget {
       case SYIconText.egg:
         icon = 'packages/sy_customs/assets/svg/egg.svg';
         break;
-      case SYIconText.eggs:
-        icon = 'packages/sy_customs/assets/svg/eggs.svg';
+      case SYIconText.store:
+        icon = 'packages/sy_customs/assets/svg/store.svg';
         break;
       case SYIconText.eggBroken:
         icon = 'packages/sy_customs/assets/svg/eggBroken.svg';
+        break;
+      case SYIconText.box:
+        icon = 'packages/sy_customs/assets/svg/box.svg';
+        break;
+      case SYIconText.eggTray:
+        icon = 'packages/sy_customs/assets/svg/eggTray.svg';
         break;
       case SYIconText.lock:
         icon = 'packages/sy_customs/assets/svg/lock.svg';
@@ -1327,6 +1349,17 @@ class SYCache {
 
   // Add an item to a String List
   static Future<void> addItemToList(String key, String value) async {
+    final prefs = await SharedPreferences.getInstance();
+    final currentList = prefs.getStringList(key) ?? [];
+
+    // Check if the value already exists before adding
+    if (!currentList.contains(value)) {
+      currentList.add(value);
+      await prefs.setStringList(key, currentList);
+    }
+  }
+
+  static Future<void> addItemForceToList(String key, String value) async {
     final prefs = await SharedPreferences.getInstance();
     final currentList = prefs.getStringList(key) ?? [];
     currentList.add(value);
