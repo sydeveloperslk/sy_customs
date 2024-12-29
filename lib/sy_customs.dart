@@ -10,6 +10,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:swipeable_button_view/swipeable_button_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 
 List<String> syStringToList(String? data, int length) {
   if (data == null || data.isEmpty) {
@@ -391,7 +392,6 @@ class SYTextField extends StatefulWidget {
     this.optionList,
     this.onSubmitted,
     this.selectedFromList,
-    required this.onClean,
     this.focusNode,
     this.isOnlySelectable = false,
   });
@@ -404,7 +404,6 @@ class SYTextField extends StatefulWidget {
   final String? old;
   final TextStyle textStyle;
   final Function(String) onChanged;
-  final Function() onClean;
   final Function(String)? onSubmitted;
   final Function(String)? selectedFromList;
   final FocusNode? focusNode;
@@ -419,14 +418,11 @@ class _SYTextFieldState extends State<SYTextField> {
 
   @override
   Widget build(BuildContext context) {
-    Color borderColor;
-    Color focusBorderColor;
+    Color? borderColor;
+    Color? focusBorderColor;
     bool isDarkMode =
         MediaQuery.of(context).platformBrightness == Brightness.dark;
     if (isDarkMode) {
-      borderColor = Colors.white;
-      focusBorderColor = Colors.white;
-    } else {
       borderColor = Colors.white;
       focusBorderColor = Colors.white;
     }
@@ -515,10 +511,17 @@ class _SYTextFieldState extends State<SYTextField> {
             focusNode: widget.focusNode ?? focusNode,
             decoration: InputDecoration(
               enabledBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: borderColor, width: 2.0),
+                borderSide: BorderSide(
+                  color: borderColor ??
+                      Colors.grey, // Fallback to grey if borderColor is null
+                  width: 2.0,
+                ),
               ),
               focusedBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: focusBorderColor, width: 2.0),
+                borderSide: BorderSide(
+                    color: borderColor ??
+                        Colors.grey, // Fallback to grey if borderColor is null
+                    width: 2.0),
               ),
               errorBorder: const OutlineInputBorder(
                 borderSide: BorderSide(color: Colors.red, width: 2.0),
@@ -531,29 +534,17 @@ class _SYTextFieldState extends State<SYTextField> {
                   ? const SizedBox()
                   : IconButton(
                       onPressed: () {
-                        if (textEditingController.text.isNotEmpty) {
-                          widget.onSubmitted!(textEditingController.text);
-                        } else {
-                          widget.onClean();
-                        }
+                        widget.onSubmitted!(textEditingController.text);
                       },
                       icon: const Icon(Icons.check)),
             ),
             onSubmitted: (dd) {
-              if (dd.isEmpty) {
-                widget.onClean();
-              } else {
-                if (widget.onSubmitted != null) {
-                  widget.onSubmitted!(dd);
-                }
+              if (widget.onSubmitted != null) {
+                widget.onSubmitted!(dd);
               }
             },
             onChanged: (dd) {
-              if (dd.isNotEmpty) {
-                widget.onChanged(dd);
-              } else {
-                widget.onClean();
-              }
+              widget.onChanged(dd);
             },
           ),
         );
@@ -603,6 +594,12 @@ class _SySlideButtonState extends State<SySlideButton> {
       ),
     );
   }
+}
+
+String syFormatNumber(int number) {
+  // Create a NumberFormat instance for grouping by thousands
+  final NumberFormat numberFormat = NumberFormat('#,##0');
+  return numberFormat.format(number);
 }
 
 String? sySentenceCaseNullable(String? old) {
@@ -1264,28 +1261,81 @@ class SYIcon extends StatelessWidget {
   }
 }
 
-Future<DateTime?> selectDateTime(BuildContext context) async {
-  final DateTime? pickedDate = await showDatePicker(
-    context: context,
-    initialDate: DateTime.now(),
-    firstDate: DateTime(2000),
-    lastDate: DateTime(2101),
-  );
-  if (pickedDate != null && context.mounted) {
+enum DateTimeSelectionMode { dateOnly, timeOnly, dateAndTime }
+
+Future<DateTime?> sySelectDateTime(
+  BuildContext context,
+  DateTimeSelectionMode mode,
+) async {
+  DateTime? selectedDate;
+  TimeOfDay? selectedTime;
+
+  if (mode == DateTimeSelectionMode.dateOnly ||
+      mode == DateTimeSelectionMode.dateAndTime) {
+    if (!context.mounted) return null;
+    final DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2101),
+    );
+    if (pickedDate != null) {
+      selectedDate = pickedDate;
+    }
+  }
+
+  if (mode == DateTimeSelectionMode.timeOnly ||
+      mode == DateTimeSelectionMode.dateAndTime) {
+    if (!context.mounted) return null;
     final TimeOfDay? pickedTime = await showTimePicker(
       context: context,
       initialTime: TimeOfDay.now(),
     );
     if (pickedTime != null) {
-      return DateTime(
-        pickedDate.year,
-        pickedDate.month,
-        pickedDate.day,
-        pickedTime.hour,
-        pickedTime.minute,
+      int hour = pickedTime.hour;
+      // Adjust for AM/PM directly
+      if (hour < 12 && !pickedTime.period.index.isOdd) {
+        print("Convert to PM hour");
+        hour += 12; // Convert to PM hour
+      } else if (hour == 12 && pickedTime.period.index.isOdd) {
+        print("AM hour");
+        hour = 0; // Convert 12 AM to 0 hour
+      }
+
+      selectedTime = TimeOfDay(
+        hour: hour,
+        minute: pickedTime.minute,
       );
     }
   }
+
+  if (mode == DateTimeSelectionMode.dateOnly && selectedDate != null) {
+    return DateTime(selectedDate.year, selectedDate.month, selectedDate.day);
+  }
+
+  if (mode == DateTimeSelectionMode.timeOnly && selectedTime != null) {
+    final now = DateTime.now();
+    return DateTime(
+      now.year,
+      now.month,
+      now.day,
+      selectedTime.hour,
+      selectedTime.minute,
+    );
+  }
+
+  if (mode == DateTimeSelectionMode.dateAndTime &&
+      selectedDate != null &&
+      selectedTime != null) {
+    return DateTime(
+      selectedDate.year,
+      selectedDate.month,
+      selectedDate.day,
+      selectedTime.hour,
+      selectedTime.minute,
+    );
+  }
+
   return null;
 }
 
