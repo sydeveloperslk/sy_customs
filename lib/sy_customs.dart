@@ -1,5 +1,6 @@
 library sy_customs;
 
+import 'dart:convert';
 import 'dart:io';
 import 'dart:ui';
 import 'package:gap/gap.dart';
@@ -11,6 +12,50 @@ import 'package:swipeable_button_view/swipeable_button_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:http/http.dart' as http;
+
+Future<dynamic> syServerResponse(
+  String url,
+  Map<String, dynamic> requestBody, {
+  bool? getError,
+  bool? debug,
+}) async {
+  try {
+    Uri? mmm = Uri.tryParse(url);
+    if (mmm == null) {
+      syErrorPrint("url is wrong url is :$url");
+      return;
+    }
+    final response = await http.post(
+      Uri.parse(url),
+      body: jsonEncode(requestBody),
+    );
+    if (response.statusCode == 200) {
+      if (debug != null && debug) {
+        syResPrint(url, response.body);
+      }
+      final data2 = json.decode(response.body);
+
+      if (getError != null && getError) {
+        return data2;
+      }
+      if (data2["status"] == "success") {
+        return data2["message"];
+      } else {
+        syErrorPrint("Server  status = 'error' url is :$url");
+      }
+    } else {
+      syErrorPrint(
+          "Server  Error statusCode:${response.statusCode} url is :$url");
+    }
+  } catch (e) {
+    syErrorPrint("Network error for server format error $url");
+  }
+}
+
+String syFirstCapital(String name) {
+  return name[0].toUpperCase() + name.substring(1);
+}
 
 List<String> syStringToList(String? data, int length) {
   if (data == null || data.isEmpty) {
@@ -504,25 +549,23 @@ class _SYTextFieldState extends State<SYTextField> {
         }
 
         return Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.all(3.0),
           child: TextField(
             controller: textEditingController,
             inputFormatters: widget.inputFormatters,
             focusNode: widget.focusNode ?? focusNode,
             decoration: InputDecoration(
-              enabledBorder: OutlineInputBorder(
-                borderSide: BorderSide(
-                  color: borderColor ??
-                      Colors.grey, // Fallback to grey if borderColor is null
-                  width: 2.0,
-                ),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderSide: BorderSide(
-                    color: borderColor ??
-                        Colors.grey, // Fallback to grey if borderColor is null
-                    width: 2.0),
-              ),
+              enabledBorder: borderColor == null
+                  ? const OutlineInputBorder()
+                  : OutlineInputBorder(
+                      borderSide: BorderSide(color: borderColor),
+                    ),
+              focusedBorder: focusBorderColor == null
+                  ? const OutlineInputBorder()
+                  : OutlineInputBorder(
+                      borderSide:
+                          BorderSide(color: focusBorderColor, width: 2.0),
+                    ),
               errorBorder: const OutlineInputBorder(
                 borderSide: BorderSide(color: Colors.red, width: 2.0),
               ),
@@ -558,6 +601,7 @@ class SySlideButton extends StatefulWidget {
     super.key,
     required this.text,
     this.fontSize = 15,
+    this.onFinished,
     required this.onSlide,
     required this.active,
   });
@@ -565,6 +609,7 @@ class SySlideButton extends StatefulWidget {
   final bool active;
   final String text;
   final Function() onSlide;
+  final Function()? onFinished;
   @override
   State<SySlideButton> createState() => _SySlideButtonState();
 }
@@ -586,11 +631,18 @@ class _SySlideButtonState extends State<SySlideButton> {
         onWaitingProcess: () async {
           await widget.onSlide();
           Future.delayed(const Duration(milliseconds: 300), () {
-            setState(() => isFinished = true);
+            if (mounted) {
+              setState(() => isFinished = true);
+            }
           });
         },
         isFinished: isFinished,
-        onFinish: () async {},
+        onFinish: () async {
+          if (mounted) {
+            setState(() => isFinished = false);
+          }
+          widget.onFinished != null ? widget.onFinished!() : null;
+        },
       ),
     );
   }
@@ -645,6 +697,7 @@ Future<void> syShowAlert(
   String title,
   String content,
 ) async {
+  print("SY showing Alert $title $content");
   return showDialog(
     context: context,
     builder: (context) {
@@ -858,6 +911,16 @@ enum SYIconText {
   fingerPrint('fingerPrint'),
   notification('notification'),
   invoice('invoice'),
+  bell('bell'),
+  chick('chick'),
+  medicine('medicine'),
+  chickenLayEgg('chickenLayEgg'),
+  chickenFeed('chickenFeed'),
+  grow('grow'),
+  eBill('eBill'),
+  boost('boost'),
+  inspect('inspect'),
+  orders('orders'),
   request('request'),
   more('more'),
   pending('pending'),
@@ -917,6 +980,8 @@ enum SYIconText {
   accounts('accounts'),
   customize('customize'),
   gender('gender'),
+  bullet('bullet'),
+  shortage('shortage'),
   house('house');
 
   const SYIconText(this.status);
@@ -938,6 +1003,26 @@ enum SYIconText {
         return SYIconText.masjid_2;
       case 'invoice':
         return SYIconText.invoice;
+      case 'bell':
+        return SYIconText.bell;
+      case 'chick':
+        return SYIconText.chick;
+      case 'medicine':
+        return SYIconText.medicine;
+      case 'chickenLayEgg':
+        return SYIconText.chickenLayEgg;
+      case 'chickenFeed':
+        return SYIconText.chickenFeed;
+      case 'grow':
+        return SYIconText.grow;
+      case 'eBill':
+        return SYIconText.eBill;
+      case 'boost':
+        return SYIconText.boost;
+      case 'inspect':
+        return SYIconText.inspect;
+      case 'orders':
+        return SYIconText.orders;
       case 'analysis':
         return SYIconText.analysis;
       case 'notification':
@@ -1020,6 +1105,10 @@ enum SYIconText {
         return SYIconText.app;
       case 'gender':
         return SYIconText.gender;
+      case 'bullet':
+        return SYIconText.bullet;
+      case 'shortage':
+        return SYIconText.shortage;
       case 'map':
         return SYIconText.map;
       case 'construction':
@@ -1077,6 +1166,26 @@ class SYIcon extends StatelessWidget {
         icon = 'packages/sy_customs/assets/svg/more.svg';
       case SYIconText.invoice:
         icon = 'packages/sy_customs/assets/svg/invoice.svg';
+      case SYIconText.bell:
+        icon = 'packages/sy_customs/assets/svg/bell.svg';
+      case SYIconText.chick:
+        icon = 'packages/sy_customs/assets/svg/chick.svg';
+      case SYIconText.medicine:
+        icon = 'packages/sy_customs/assets/svg/medicine.svg';
+      case SYIconText.chickenLayEgg:
+        icon = 'packages/sy_customs/assets/svg/chickenLayEgg.svg';
+      case SYIconText.chickenFeed:
+        icon = 'packages/sy_customs/assets/svg/chickenFeed.svg';
+      case SYIconText.grow:
+        icon = 'packages/sy_customs/assets/svg/grow.svg';
+      case SYIconText.eBill:
+        icon = 'packages/sy_customs/assets/svg/eBill.svg';
+      case SYIconText.boost:
+        icon = 'packages/sy_customs/assets/svg/boost.svg';
+      case SYIconText.inspect:
+        icon = 'packages/sy_customs/assets/svg/inspect.svg';
+      case SYIconText.orders:
+        icon = 'packages/sy_customs/assets/svg/orders.svg';
       case SYIconText.request:
         icon = 'packages/sy_customs/assets/svg/request.svg';
       case SYIconText.accounts:
@@ -1122,6 +1231,12 @@ class SYIcon extends StatelessWidget {
         break;
       case SYIconText.gender:
         icon = 'packages/sy_customs/assets/svg/gender.svg';
+        break;
+      case SYIconText.bullet:
+        icon = 'packages/sy_customs/assets/svg/bullet.svg';
+        break;
+      case SYIconText.shortage:
+        icon = 'packages/sy_customs/assets/svg/shortage.svg';
         break;
       case SYIconText.idCard:
         icon = 'packages/sy_customs/assets/svg/id_card.svg';
@@ -1263,11 +1378,8 @@ class SYIcon extends StatelessWidget {
 
 enum DateTimeSelectionMode { dateOnly, timeOnly, dateAndTime }
 
-Future<DateTime?> sySelectDateTime(
-  BuildContext context,
-  DateTimeSelectionMode mode,
-) async {
-  DateTime? selectedDate;
+Future<DateTime?> sySelectDateTime(BuildContext context,
+    DateTimeSelectionMode mode, DateTime? selectedDate) async {
   TimeOfDay? selectedTime;
 
   if (mode == DateTimeSelectionMode.dateOnly ||
@@ -1275,7 +1387,7 @@ Future<DateTime?> sySelectDateTime(
     if (!context.mounted) return null;
     final DateTime? pickedDate = await showDatePicker(
       context: context,
-      initialDate: DateTime.now(),
+      initialDate: selectedDate ?? DateTime.now(),
       firstDate: DateTime(2000),
       lastDate: DateTime(2101),
     );
@@ -1292,18 +1404,18 @@ Future<DateTime?> sySelectDateTime(
       initialTime: TimeOfDay.now(),
     );
     if (pickedTime != null) {
-      int hour = pickedTime.hour;
-      // Adjust for AM/PM directly
-      if (hour < 12 && !pickedTime.period.index.isOdd) {
-        print("Convert to PM hour");
-        hour += 12; // Convert to PM hour
-      } else if (hour == 12 && pickedTime.period.index.isOdd) {
-        print("AM hour");
-        hour = 0; // Convert 12 AM to 0 hour
-      }
+      // int hour = pickedTime.hour;
+      // // Adjust for AM/PM directly
+      // if (hour < 12 && !pickedTime.period.index.isOdd) {
+      //   print("Convert to PM hour");
+      //   hour += 12; // Convert to PM hour
+      // } else if (hour == 12 && pickedTime.period.index.isOdd) {
+      //   print("AM hour");
+      //   hour = 0; // Convert 12 AM to 0 hour
+      // }
 
       selectedTime = TimeOfDay(
-        hour: hour,
+        hour: pickedTime.hour,
         minute: pickedTime.minute,
       );
     }
@@ -1337,6 +1449,42 @@ Future<DateTime?> sySelectDateTime(
   }
 
   return null;
+}
+
+String syDisplayTimeWithAmPm(DateTime? time, DateTimeSelectionMode mode) {
+  if (time == null) {
+    return "Not Available";
+  }
+
+  String dateStr = '';
+  String timeStr = '';
+
+  // Handle the date part based on selection mode
+  if (mode == DateTimeSelectionMode.dateOnly ||
+      mode == DateTimeSelectionMode.dateAndTime) {
+    dateStr =
+        DateFormat('yyyy-MM-dd').format(time); // Format the date as YYYY-MM-DD
+  }
+
+  // Handle the time part
+  if (mode == DateTimeSelectionMode.timeOnly ||
+      mode == DateTimeSelectionMode.dateAndTime) {
+    bool isAm = true;
+    String mmm = DateFormat('hh:mm').format(time); // Format time as HH:MM
+    if (int.parse(DateFormat('HH').format(time)) > 11) {
+      isAm = false;
+    }
+    timeStr = "$mmm ${isAm ? "AM" : "PM"}";
+  }
+
+  // Combine the date and time based on the mode
+  if (mode == DateTimeSelectionMode.dateAndTime) {
+    return "$dateStr $timeStr";
+  } else if (mode == DateTimeSelectionMode.dateOnly) {
+    return dateStr;
+  } else {
+    return timeStr;
+  }
 }
 
 class SYHexColor extends Color {
