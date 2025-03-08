@@ -433,17 +433,17 @@ class SYTextField extends StatefulWidget {
     this.old,
     this.textStyle = const TextStyle(),
     required this.onChanged,
-    this.inputFormatters,
     this.optionList,
     this.onSubmitted,
     this.selectedFromList,
     this.focusNode,
-    this.isOnlySelectable = false,
+    this.prefixIcon,
+    this.numericType, // Updated to accept SYNumeric
   });
 
+  final Widget? prefixIcon;
   final Color borderColor;
   final Color focusBorderColor;
-  final List<TextInputFormatter>? inputFormatters;
   final List<String>? optionList;
   final String label;
   final String? old;
@@ -452,7 +452,7 @@ class SYTextField extends StatefulWidget {
   final Function(String)? onSubmitted;
   final Function(String)? selectedFromList;
   final FocusNode? focusNode;
-  final bool isOnlySelectable;
+  final SYNumeric? numericType; // Added SYNumeric
 
   @override
   State<SYTextField> createState() => _SYTextFieldState();
@@ -471,6 +471,21 @@ class _SYTextFieldState extends State<SYTextField> {
       borderColor = Colors.white;
       focusBorderColor = Colors.white;
     }
+
+    // Determine keyboardType and inputFormatters based on SYNumeric type
+    TextInputType keyboardType = TextInputType.text;
+    List<TextInputFormatter>? inputFormatters;
+
+    if (widget.numericType == SYNumeric.intValue) {
+      keyboardType = TextInputType.number;
+      inputFormatters = [FilteringTextInputFormatter.digitsOnly];
+    } else if (widget.numericType == SYNumeric.doubleValue) {
+      keyboardType = const TextInputType.numberWithOptions(decimal: true);
+      inputFormatters = [
+        FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d*')),
+      ];
+    }
+
     return Autocomplete<String>(
       optionsBuilder: (TextEditingValue textEditingValue) {
         if (widget.optionList == null) {
@@ -483,8 +498,7 @@ class _SYTextFieldState extends State<SYTextField> {
               .contains(textEditingValue.text.toLowerCase());
         }).toList();
         if (textEditingValue.text.isNotEmpty &&
-            !h.contains(textEditingValue.text.toLowerCase()) &&
-            !widget.isOnlySelectable) {
+            !h.contains(textEditingValue.text.toLowerCase())) {
           h.add(textEditingValue.text.toLowerCase());
           goingToAdd = textEditingValue.text.toLowerCase();
         } else {
@@ -501,7 +515,7 @@ class _SYTextFieldState extends State<SYTextField> {
                 alignment: Alignment.topLeft,
                 child: Container(
                   color: const Color.fromARGB(156, 0, 0, 0),
-                  width: 300, // Set your desired width here
+                  width: 300,
                   child: ListView.builder(
                     padding: const EdgeInsets.all(8.0),
                     itemCount: options.length,
@@ -515,7 +529,7 @@ class _SYTextFieldState extends State<SYTextField> {
                             if (goingToAdd == option) {
                               bool? c = await syConfirmPopUp(
                                   context,
-                                  "Conform Add",
+                                  "Confirm Add",
                                   "Do you need to add new value $option");
                               if (c) {
                                 onSelected(option);
@@ -545,16 +559,23 @@ class _SYTextFieldState extends State<SYTextField> {
           FocusNode focusNode,
           VoidCallback onFieldSubmitted) {
         if (widget.old != null) {
-          textEditingController.text = widget.old!;
+          String d = widget.old!;
+          if (widget.numericType == SYNumeric.doubleValue ||
+              widget.numericType == SYNumeric.intValue) {
+            d = d.replaceAll(",", "");
+          }
+          textEditingController.text = d;
         }
 
         return Padding(
           padding: const EdgeInsets.all(3.0),
           child: TextField(
             controller: textEditingController,
-            inputFormatters: widget.inputFormatters,
+            keyboardType: keyboardType,
+            inputFormatters: inputFormatters,
             focusNode: widget.focusNode ?? focusNode,
             decoration: InputDecoration(
+              prefixIcon: widget.prefixIcon,
               enabledBorder: borderColor == null
                   ? const OutlineInputBorder()
                   : OutlineInputBorder(
@@ -587,7 +608,7 @@ class _SYTextFieldState extends State<SYTextField> {
               }
             },
             onChanged: (dd) {
-              widget.onChanged(dd);
+              widget.onChanged(dd.trim());
             },
           ),
         );
@@ -829,24 +850,41 @@ class SYBox extends StatelessWidget {
   }
 }
 
-String syAvoidZero(double mDouble) {
-  if (mDouble % 1 == 0) {
-    return mDouble.floor().toString();
-  }
-
-  if ((mDouble * 100) % 1 == 0) {
-    return mDouble.toString();
+String syAvoidExtraZero(double mDouble, {bool? isDoubleFixed}) {
+  if (isDoubleFixed != null && isDoubleFixed) {
+    final NumberFormat numberFormat = NumberFormat('#,##0.00');
+    return numberFormat.format(mDouble);
+  } else if (mDouble % 1 == 0) {
+    final NumberFormat numberFormat = NumberFormat('#,##0');
+    return numberFormat.format(mDouble.floor());
+  } else if ((mDouble * 10) % 1 == 0) {
+    final NumberFormat numberFormat = NumberFormat('#,##0.00');
+    return numberFormat.format(mDouble);
   } else {
     double r = (mDouble * 100).floor() / 100;
-    return r.toString();
+    final NumberFormat numberFormat = NumberFormat('#,##0.00');
+    return numberFormat.format(r);
   }
 }
 
-String? syAvoidZeroNullable(double? mDouble) {
+String? syAvoidExtraZeroNullable(double? mDouble, {bool? isDoubleFixed}) {
   if (mDouble == null) {
     return null;
   }
-  return syAvoidZero(mDouble);
+  return syAvoidExtraZero(mDouble, isDoubleFixed: isDoubleFixed);
+}
+
+double syMod(double double) {
+  if (double < 0) {
+    return double * -1;
+  }
+  return double;
+}
+
+AppBar syAppBar(String title) {
+  return AppBar(
+    title: Text(title),
+  );
 }
 
 void syShowToast(BuildContext context, String text) {
@@ -922,6 +960,8 @@ enum SYIconText {
   inspect('inspect'),
   orders('orders'),
   request('request'),
+  cashOut('cashOut'),
+  donation('donation'),
   more('more'),
   pending('pending'),
   rejected('rejected'),
@@ -962,6 +1002,7 @@ enum SYIconText {
   star('star'),
   app('app'),
   map('map'),
+  map2('map2'),
   yeezzLogo('yeezzLogo'),
   go('go'),
   construction('construction'),
@@ -969,6 +1010,8 @@ enum SYIconText {
   thinking('thinking'),
   chicken('chicken'),
   whatsapp('whatsapp'),
+  eggWaste('eggWaste'),
+  eggLaid('eggLaid'),
   list('list'),
   noUpdate('noUpdate'),
   send('send'),
@@ -981,6 +1024,7 @@ enum SYIconText {
   customize('customize'),
   gender('gender'),
   bullet('bullet'),
+  chickenFeeding('chickenFeeding'),
   shortage('shortage'),
   house('house');
 
@@ -1019,6 +1063,8 @@ enum SYIconText {
         return SYIconText.eBill;
       case 'boost':
         return SYIconText.boost;
+      case 'eggLaid':
+        return SYIconText.eggLaid;
       case 'inspect':
         return SYIconText.inspect;
       case 'orders':
@@ -1109,6 +1155,8 @@ enum SYIconText {
         return SYIconText.bullet;
       case 'shortage':
         return SYIconText.shortage;
+      case 'map2':
+        return SYIconText.map2;
       case 'map':
         return SYIconText.map;
       case 'construction':
@@ -1143,10 +1191,18 @@ enum SYIconText {
         return SYIconText.yeezzLogo;
       case 'chat':
         return SYIconText.chat;
+      case 'eggWaste':
+        return SYIconText.eggWaste;
       case 'send':
         return SYIconText.send;
       case 'list':
         return SYIconText.list;
+      case 'donation':
+        return SYIconText.donation;
+      case 'cashOut':
+        return SYIconText.cashOut;
+      case 'chickenFeeding':
+        return SYIconText.chickenFeeding;
     }
     return SYIconText.construction;
   }
@@ -1164,6 +1220,14 @@ class SYIcon extends StatelessWidget {
         icon = 'packages/sy_customs/assets/svg/notification.svg';
       case SYIconText.more:
         icon = 'packages/sy_customs/assets/svg/more.svg';
+      case SYIconText.cashOut:
+        icon = 'packages/sy_customs/assets/svg/cashOut.svg';
+      case SYIconText.donation:
+        icon = 'packages/sy_customs/assets/svg/donation.svg';
+      case SYIconText.chickenFeeding:
+        icon = 'packages/sy_customs/assets/svg/chickenFeeding.svg';
+      case SYIconText.eggLaid:
+        icon = 'packages/sy_customs/assets/svg/eggLaid.svg';
       case SYIconText.invoice:
         icon = 'packages/sy_customs/assets/svg/invoice.svg';
       case SYIconText.bell:
@@ -1298,6 +1362,12 @@ class SYIcon extends StatelessWidget {
       case SYIconText.map:
         icon = 'packages/sy_customs/assets/svg/map.svg';
         break;
+      case SYIconText.eggWaste:
+        icon = 'packages/sy_customs/assets/svg/eggWaste.svg';
+        break;
+      case SYIconText.map2:
+        icon = 'packages/sy_customs/assets/svg/map2.svg';
+        break;
       case SYIconText.construction:
         icon = 'packages/sy_customs/assets/svg/construction.svg';
         break;
@@ -1376,7 +1446,7 @@ class SYIcon extends StatelessWidget {
   }
 }
 
-enum DateTimeSelectionMode { dateOnly, timeOnly, dateAndTime }
+enum DateTimeSelectionMode { dateOnly, timeOnly, dateAndTime, dateWithOutYear }
 
 Future<DateTime?> sySelectDateTime(BuildContext context,
     DateTimeSelectionMode mode, DateTime? selectedDate) async {
@@ -1451,7 +1521,10 @@ Future<DateTime?> sySelectDateTime(BuildContext context,
   return null;
 }
 
-String syDisplayTimeWithAmPm(DateTime? time, DateTimeSelectionMode mode) {
+String syDisplayTimeWithAmPm(
+  DateTime? time, {
+  DateTimeSelectionMode mode = DateTimeSelectionMode.dateOnly,
+}) {
   if (time == null) {
     return "Not Available";
   }
@@ -1464,6 +1537,9 @@ String syDisplayTimeWithAmPm(DateTime? time, DateTimeSelectionMode mode) {
       mode == DateTimeSelectionMode.dateAndTime) {
     dateStr =
         DateFormat('yyyy-MM-dd').format(time); // Format the date as YYYY-MM-DD
+  }
+  if (mode == DateTimeSelectionMode.dateWithOutYear) {
+    dateStr = DateFormat('MM-dd').format(time);
   }
 
   // Handle the time part
@@ -1485,6 +1561,14 @@ String syDisplayTimeWithAmPm(DateTime? time, DateTimeSelectionMode mode) {
   } else {
     return timeStr;
   }
+}
+
+String? syDisplayTimeWithAmPm2Nullable(DateTime? time,
+    {DateTimeSelectionMode mode = DateTimeSelectionMode.dateOnly}) {
+  if (time == null) {
+    return null;
+  }
+  return syDisplayTimeWithAmPm(time, mode: mode);
 }
 
 class SYHexColor extends Color {
@@ -1570,5 +1654,115 @@ class SYCache {
     final currentList = prefs.getStringList(key) ?? [];
     currentList.remove(value);
     await prefs.setStringList(key, currentList);
+  }
+}
+
+Widget syGrid2(
+  List<Widget> theWidgetList, {
+  double? width,
+  double? height,
+}) {
+  if (theWidgetList.isEmpty) {
+    return const Center(
+      child: Text('No matching items found'),
+    );
+  }
+  return LayoutBuilder(
+    builder: (context, constraints) {
+      // Calculate the number of columns based on screen width
+      int columns =
+          constraints.maxWidth ~/ (width ?? 200); // 300px width + some spacing
+      columns = columns > 0 ? columns : 1; // Ensure at least 1 column
+      int rows = (theWidgetList.length / columns).ceil();
+
+      return Column(
+        children: [
+          for (int index = 0; index < rows; index++) ...{
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                for (int c = 0; c < columns; c++)
+                  if (index * columns + c <
+                      theWidgetList.length) // Prevent index out of range
+                    SizedBox(
+                      width: (width ?? 200),
+                      child: ConstrainedBox(
+                          constraints: const BoxConstraints(minHeight: 100),
+                          child: theWidgetList[index * columns + c]),
+                    )
+              ],
+            )
+          }
+        ],
+      );
+    },
+  );
+}
+
+enum SYNumeric { doubleValue, intValue }
+
+Future<String?> syAskToTypeAnything({
+  required BuildContext context,
+  required String title,
+  required String label,
+  SYNumeric? numericType,
+  String? old,
+}) async {
+  String typed = old ?? "";
+  return await showDialog<String>(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        title: Text(title),
+        content: SYTextField(
+          label: label,
+          numericType: numericType,
+          old: old,
+          onChanged: (e) {
+            typed = e;
+          },
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, null),
+            child: const Text("Cancel"),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, typed),
+            child: const Text("Save"),
+          ),
+        ],
+      );
+    },
+  );
+}
+
+Future<void> syWait(double? time) async {
+  await Future.delayed(
+      Duration(milliseconds: ((time ?? 1) * 1000).floor()), () {});
+}
+
+class SYOnTap extends StatelessWidget {
+  const SYOnTap({
+    super.key,
+    this.onTap,
+    required this.child,
+    this.onLongPress,
+  });
+  final Function()? onTap;
+  final Function()? onLongPress;
+  final Widget child;
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      cursor: (onTap != null || onLongPress != null)
+          ? SystemMouseCursors.click
+          : MouseCursor.defer,
+      child: GestureDetector(
+        onTap: onTap,
+        onLongPress: onLongPress,
+        child: child,
+      ),
+    );
   }
 }
