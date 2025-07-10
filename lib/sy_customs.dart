@@ -424,199 +424,6 @@ class _DateOfBirthSelectorState extends State<DateOfBirthSelector> {
   }
 }
 
-class SYTextField extends StatefulWidget {
-  const SYTextField({
-    super.key,
-    this.borderColor = Colors.black,
-    this.focusBorderColor = Colors.black,
-    required this.label,
-    this.old,
-    this.textStyle = const TextStyle(),
-    required this.onChanged,
-    this.optionList,
-    this.onSubmitted,
-    this.selectedFromList,
-    this.focusNode,
-    this.prefixIcon,
-    this.numericType, // Updated to accept SYNumeric
-  });
-
-  final Widget? prefixIcon;
-  final Color borderColor;
-  final Color focusBorderColor;
-  final List<String>? optionList;
-  final String label;
-  final String? old;
-  final TextStyle textStyle;
-  final Function(String) onChanged;
-  final Function(String)? onSubmitted;
-  final Function(String)? selectedFromList;
-  final FocusNode? focusNode;
-  final SYNumeric? numericType; // Added SYNumeric
-
-  @override
-  State<SYTextField> createState() => _SYTextFieldState();
-}
-
-class _SYTextFieldState extends State<SYTextField> {
-  String goingToAdd = "";
-
-  @override
-  Widget build(BuildContext context) {
-    Color? borderColor;
-    Color? focusBorderColor;
-    bool isDarkMode =
-        MediaQuery.of(context).platformBrightness == Brightness.dark;
-    if (isDarkMode) {
-      borderColor = Colors.white;
-      focusBorderColor = Colors.white;
-    }
-
-    // Determine keyboardType and inputFormatters based on SYNumeric type
-    TextInputType keyboardType = TextInputType.text;
-    List<TextInputFormatter>? inputFormatters;
-
-    if (widget.numericType == SYNumeric.intValue) {
-      keyboardType = TextInputType.number;
-      inputFormatters = [FilteringTextInputFormatter.digitsOnly];
-    } else if (widget.numericType == SYNumeric.doubleValue) {
-      keyboardType = const TextInputType.numberWithOptions(decimal: true);
-      inputFormatters = [
-        FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d*')),
-      ];
-    }
-
-    return Autocomplete<String>(
-      optionsBuilder: (TextEditingValue textEditingValue) {
-        if (widget.optionList == null) {
-          return const Iterable<String>.empty();
-        }
-
-        List<String> h = widget.optionList!.where((String option) {
-          return option
-              .toLowerCase()
-              .contains(textEditingValue.text.toLowerCase());
-        }).toList();
-        if (textEditingValue.text.isNotEmpty &&
-            !h.contains(textEditingValue.text.toLowerCase())) {
-          h.add(textEditingValue.text.toLowerCase());
-          goingToAdd = textEditingValue.text.toLowerCase();
-        } else {
-          goingToAdd = "";
-        }
-
-        return h.map((f) => sySentenceCase(f)).toList();
-      },
-      optionsViewBuilder: widget.optionList == null
-          ? null
-          : (BuildContext context, AutocompleteOnSelected<String> onSelected,
-              Iterable<String> options) {
-              return Align(
-                alignment: Alignment.topLeft,
-                child: Container(
-                  color: const Color.fromARGB(156, 0, 0, 0),
-                  width: 300,
-                  child: ListView.builder(
-                    padding: const EdgeInsets.all(8.0),
-                    itemCount: options.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      String option = options.elementAt(index);
-
-                      return Card(
-                        color: const Color.fromARGB(255, 249, 237, 237),
-                        child: ListTile(
-                          onTap: () async {
-                            if (goingToAdd == option) {
-                              bool? c = await syConfirmPopUp(
-                                  context,
-                                  "Confirm Add",
-                                  "Do you need to add new value $option");
-                              if (c) {
-                                onSelected(option);
-                              }
-                            } else {
-                              onSelected(option);
-                            }
-                          },
-                          title: Text(option),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              );
-            },
-      onSelected: (dd) {
-        if (widget.onSubmitted != null) {
-          widget.onSubmitted!(dd);
-        }
-        if (widget.selectedFromList != null) {
-          widget.selectedFromList!(dd);
-        }
-      },
-      fieldViewBuilder: (BuildContext context,
-          TextEditingController textEditingController,
-          FocusNode focusNode,
-          VoidCallback onFieldSubmitted) {
-        if (widget.old != null) {
-          String d = widget.old!;
-          if (widget.numericType == SYNumeric.doubleValue ||
-              widget.numericType == SYNumeric.intValue) {
-            d = d.replaceAll(",", "");
-          }
-          textEditingController.text = d;
-        }
-
-        return Padding(
-          padding: const EdgeInsets.all(3.0),
-          child: TextField(
-            controller: textEditingController,
-            keyboardType: keyboardType,
-            inputFormatters: inputFormatters,
-            focusNode: widget.focusNode ?? focusNode,
-            decoration: InputDecoration(
-              prefixIcon: widget.prefixIcon,
-              enabledBorder: borderColor == null
-                  ? const OutlineInputBorder()
-                  : OutlineInputBorder(
-                      borderSide: BorderSide(color: borderColor),
-                    ),
-              focusedBorder: focusBorderColor == null
-                  ? const OutlineInputBorder()
-                  : OutlineInputBorder(
-                      borderSide:
-                          BorderSide(color: focusBorderColor, width: 2.0),
-                    ),
-              errorBorder: const OutlineInputBorder(
-                borderSide: BorderSide(color: Colors.red, width: 2.0),
-              ),
-              label: Text(
-                widget.label,
-                style: widget.textStyle,
-              ),
-              suffixIcon: widget.onSubmitted == null
-                  ? const SizedBox()
-                  : IconButton(
-                      onPressed: () {
-                        widget.onSubmitted!(textEditingController.text);
-                      },
-                      icon: const Icon(Icons.check)),
-            ),
-            onSubmitted: (dd) {
-              if (widget.onSubmitted != null) {
-                widget.onSubmitted!(dd);
-              }
-            },
-            onChanged: (dd) {
-              widget.onChanged(dd.trim());
-            },
-          ),
-        );
-      },
-    );
-  }
-}
-
 class SySlideButton extends StatefulWidget {
   const SySlideButton({
     super.key,
@@ -718,7 +525,6 @@ Future<void> syShowAlert(
   String title,
   String content,
 ) async {
-  print("SY showing Alert $title $content");
   return showDialog(
     context: context,
     builder: (context) {
@@ -850,7 +656,7 @@ class SYBox extends StatelessWidget {
   }
 }
 
-String syAvoidExtraZero(double mDouble, {bool? isDoubleFixed}) {
+String syAvoidExtraZero(num mDouble, {bool? isDoubleFixed}) {
   if (isDoubleFixed != null && isDoubleFixed) {
     final NumberFormat numberFormat = NumberFormat('#,##0.00');
     return numberFormat.format(mDouble);
@@ -867,18 +673,18 @@ String syAvoidExtraZero(double mDouble, {bool? isDoubleFixed}) {
   }
 }
 
-String? syAvoidExtraZeroNullable(double? mDouble, {bool? isDoubleFixed}) {
+String? syAvoidExtraZeroNullable(num? mDouble, {bool? isDoubleFixed}) {
   if (mDouble == null) {
     return null;
   }
   return syAvoidExtraZero(mDouble, isDoubleFixed: isDoubleFixed);
 }
 
-double syMod(double double) {
-  if (double < 0) {
-    return double * -1;
+num syMod(num m) {
+  if (m < 0) {
+    return m * -1;
   }
-  return double;
+  return m;
 }
 
 AppBar syAppBar(String title) {
@@ -947,6 +753,11 @@ class Nav {
 enum SYIconText {
   personRelation('personRelation'),
   fingerPrint('fingerPrint'),
+  whole('whole'),
+  eggs('eggs'),
+  donate('donate'),
+  verified('verified'),
+  download('download'),
   notification('notification'),
   invoice('invoice'),
   bell('bell'),
@@ -1073,6 +884,17 @@ enum SYIconText {
         return SYIconText.analysis;
       case 'notification':
         return SYIconText.notification;
+      case 'whole':
+        return SYIconText.whole;
+
+      case 'verified':
+        return SYIconText.verified;
+      case 'eggs':
+        return SYIconText.eggs;
+      case 'donate':
+        return SYIconText.donate;
+      case 'download':
+        return SYIconText.download;
       case 'masjid':
         return SYIconText.masjid;
       case 'lock':
@@ -1208,6 +1030,31 @@ enum SYIconText {
   }
 }
 
+class SYLine extends StatelessWidget {
+  const SYLine(
+      {super.key,
+      this.size = 7,
+      this.padding = 5,
+      this.color = const Color.fromARGB(255, 246, 118, 109)});
+  final double size;
+  final double padding;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: padding),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(30),
+          color: color,
+        ),
+        height: size,
+      ),
+    );
+  }
+}
+
 class SYIcon extends StatelessWidget {
   const SYIcon({super.key, required this.data, this.size = 30});
   final SYIconText data;
@@ -1216,6 +1063,16 @@ class SYIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     String icon = 'packages/sy_customs/assets/icons/error.svg';
     switch (data) {
+      case SYIconText.verified:
+        icon = 'packages/sy_customs/assets/svg/verified.svg';
+      case SYIconText.donate:
+        icon = 'packages/sy_customs/assets/svg/donate.svg';
+      case SYIconText.eggs:
+        icon = 'packages/sy_customs/assets/svg/eggs.svg';
+      case SYIconText.download:
+        icon = 'packages/sy_customs/assets/svg/download.svg';
+      case SYIconText.whole:
+        icon = 'packages/sy_customs/assets/svg/whole.svg';
       case SYIconText.notification:
         icon = 'packages/sy_customs/assets/svg/notification.svg';
       case SYIconText.more:
@@ -1448,8 +1305,12 @@ class SYIcon extends StatelessWidget {
 
 enum DateTimeSelectionMode { dateOnly, timeOnly, dateAndTime, dateWithOutYear }
 
-Future<DateTime?> sySelectDateTime(BuildContext context,
-    DateTimeSelectionMode mode, DateTime? selectedDate) async {
+Future<DateTime?> sySelectDateTime(
+  BuildContext context,
+  DateTime? selectedDate, {
+  DateTimeSelectionMode mode = DateTimeSelectionMode.dateOnly,
+  String? helpText,
+}) async {
   TimeOfDay? selectedTime;
 
   if (mode == DateTimeSelectionMode.dateOnly ||
@@ -1457,6 +1318,7 @@ Future<DateTime?> sySelectDateTime(BuildContext context,
     if (!context.mounted) return null;
     final DateTime? pickedDate = await showDatePicker(
       context: context,
+      helpText: helpText,
       initialDate: selectedDate ?? DateTime.now(),
       firstDate: DateTime(2000),
       lastDate: DateTime(2101),
@@ -1470,20 +1332,11 @@ Future<DateTime?> sySelectDateTime(BuildContext context,
       mode == DateTimeSelectionMode.dateAndTime) {
     if (!context.mounted) return null;
     final TimeOfDay? pickedTime = await showTimePicker(
+      helpText: helpText,
       context: context,
       initialTime: TimeOfDay.now(),
     );
     if (pickedTime != null) {
-      // int hour = pickedTime.hour;
-      // // Adjust for AM/PM directly
-      // if (hour < 12 && !pickedTime.period.index.isOdd) {
-      //   print("Convert to PM hour");
-      //   hour += 12; // Convert to PM hour
-      // } else if (hour == 12 && pickedTime.period.index.isOdd) {
-      //   print("AM hour");
-      //   hour = 0; // Convert 12 AM to 0 hour
-      // }
-
       selectedTime = TimeOfDay(
         hour: pickedTime.hour,
         minute: pickedTime.minute,
@@ -1657,7 +1510,156 @@ class SYCache {
   }
 }
 
-Widget syGrid2(
+String syAvoidsExtraZeroInLack(num mDouble, {bool? isDoubleFixed}) {
+  if (isDoubleFixed != null && isDoubleFixed) {
+    final NumberFormat numberFormat = NumberFormat('#,##,##0.00');
+    return numberFormat.format(mDouble);
+  } else if (mDouble % 1 == 0) {
+    final NumberFormat numberFormat = NumberFormat('#,##,##0');
+
+    return numberFormat.format(mDouble.floor());
+  } else if ((mDouble * 10) % 1 == 0) {
+    final NumberFormat numberFormat = NumberFormat('#,##,##0.00');
+
+    return numberFormat.format(mDouble);
+  } else {
+    double r = (mDouble * 100).floor() / 100;
+    final NumberFormat numberFormat = NumberFormat('#,##,##0.00');
+
+    return numberFormat.format(r);
+  }
+}
+
+bool syIsDateInRange(DateTime date, DateTime? start, DateTime? end) {
+  date = DateTime(date.year, date.month, date.day);
+  if (start != null) {
+    start = DateTime(start.year, start.month, start.day);
+  }
+  if (end != null) {
+    end = DateTime(end.year, end.month, end.day);
+  }
+  bool k =
+      (start == null || date.isAfter(start) || date.isAtSameMomentAs(start)) &&
+          (end == null || date.isBefore(end) || date.isAtSameMomentAs(end));
+  return k;
+}
+
+String? syAvoidsExtraZeroInLackNullable(num? mDouble, {bool? isDoubleFixed}) {
+  if (mDouble == null) {
+    return null;
+  }
+  return syAvoidsExtraZeroInLack(mDouble, isDoubleFixed: isDoubleFixed);
+}
+
+Future<void> syShowBottomSheet(BuildContext context, Widget widget,
+    {bool? fullHeight, EdgeInsetsGeometry? padding}) async {
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: fullHeight ?? false,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+    ),
+    builder: (context) {
+      return Padding(
+        padding: padding ?? const EdgeInsets.only(top: 15),
+        child: widget,
+      );
+    },
+  );
+}
+
+List<DateTime> syGetPreviousDays(DateTime lastDay, int count) {
+  return List.generate(
+      count, (index) => lastDay.subtract(Duration(days: index + 1)));
+}
+
+Future<String?> syAskToTypeAnything({
+  required BuildContext context,
+  required String title,
+  required String label,
+  SYNumeric? numericType,
+  bool? autoFocus,
+  String? old,
+}) async {
+  String typed = old ?? "";
+  return await showDialog<String>(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        title: Text(title),
+        content: SYTextField(
+          label: label,
+          numericType: numericType,
+          old: old,
+          autoFocus: autoFocus,
+          onChanged: (e) {
+            typed = e;
+          },
+          onSubmitted: (e) {
+            Navigator.pop(context, e);
+          },
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, null),
+            child: const Text("Cancel"),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, typed),
+            child: const Text("Save"),
+          ),
+        ],
+      );
+    },
+  );
+}
+
+Widget syGridListView(
+  List<Widget> theWidgetList, {
+  double? width,
+  double? height,
+}) {
+  if (theWidgetList.isEmpty) {
+    return const Center(
+      child: Text('No matching items found'),
+    );
+  }
+  return LayoutBuilder(
+    builder: (context, constraints) {
+      // Calculate the number of columns based on screen width
+      int columns =
+          constraints.maxWidth ~/ (width ?? 200); // 300px width + some spacing
+      columns = columns > 0 ? columns : 1; // Ensure at least 1 column
+      int rows = (theWidgetList.length / columns).ceil();
+
+      return ListView(
+        children: [
+          for (int index = 0; index < rows; index++) ...{
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                for (int c = 0; c < columns; c++)
+                  if (index * columns + c <
+                      theWidgetList.length) // Prevent index out of range
+                    SizedBox(
+                      width: width ?? 200,
+                      height: height,
+                      child: ConstrainedBox(
+                          constraints: const BoxConstraints(
+                            minHeight: 100,
+                          ),
+                          child: theWidgetList[index * columns + c]),
+                    )
+              ],
+            )
+          }
+        ],
+      );
+    },
+  );
+}
+
+Widget syGrid(
   List<Widget> theWidgetList, {
   double? width,
   double? height,
@@ -1685,11 +1687,14 @@ Widget syGrid2(
                   if (index * columns + c <
                       theWidgetList.length) // Prevent index out of range
                     SizedBox(
-                      width: (width ?? 200),
+                      width: width ?? 200,
+                      height: height,
                       child: ConstrainedBox(
-                          constraints: const BoxConstraints(minHeight: 100),
+                          constraints: const BoxConstraints(
+                            minHeight: 100,
+                          ),
                           child: theWidgetList[index * columns + c]),
-                    )
+                    ),
               ],
             )
           }
@@ -1699,42 +1704,226 @@ Widget syGrid2(
   );
 }
 
+DateTime syNextMonth(DateTime month) {
+  DateTime nextMonth = DateTime(12);
+  if (month.month == 12) {
+    nextMonth = DateTime(month.year, 1);
+  } else {
+    nextMonth = DateTime(month.year, month.month + 1);
+  }
+  return nextMonth;
+}
+
+DateTime syPreviousMonth(DateTime month) {
+  DateTime nextMonth = DateTime(12);
+  if (month.month == 1) {
+    nextMonth = DateTime(month.year - 1, 12);
+  } else {
+    nextMonth = DateTime(month.year, month.month - 1);
+  }
+  return nextMonth;
+}
+
+DateTime syLatsDayOfTheMonth(DateTime month) {
+  DateTime nextMonth = syNextMonth(month);
+  DateTime firstDay = nextMonth.copyWith(day: 1);
+  DateTime lastDay = firstDay.subtract(const Duration(days: 1));
+  return lastDay;
+}
+
 enum SYNumeric { doubleValue, intValue }
 
-Future<String?> syAskToTypeAnything({
-  required BuildContext context,
-  required String title,
-  required String label,
-  SYNumeric? numericType,
-  String? old,
-}) async {
-  String typed = old ?? "";
-  return await showDialog<String>(
-    context: context,
-    builder: (context) {
-      return AlertDialog(
-        title: Text(title),
-        content: SYTextField(
-          label: label,
-          numericType: numericType,
-          old: old,
-          onChanged: (e) {
-            typed = e;
-          },
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, null),
-            child: const Text("Cancel"),
+class SYTextField extends StatefulWidget {
+  const SYTextField({
+    super.key,
+    this.borderColor = Colors.black,
+    this.focusBorderColor = Colors.black,
+    required this.label,
+    this.old,
+    this.textStyle = const TextStyle(),
+    required this.onChanged,
+    this.optionList,
+    this.heightExpanded = false,
+    this.onSubmitted,
+    this.prefixIcon,
+    this.autoFocus,
+    this.numericType, // Updated to accept SYNumeric
+  });
+
+  final bool heightExpanded;
+  final bool? autoFocus;
+  final Widget? prefixIcon;
+  final Color borderColor;
+  final Color focusBorderColor;
+  final List<String>? optionList;
+  final String label;
+  final String? old;
+  final TextStyle textStyle;
+  final Function(String) onChanged;
+  final Function(String)? onSubmitted;
+  final SYNumeric? numericType; // Added SYNumeric
+
+  @override
+  State<SYTextField> createState() => _SYTextFieldState();
+}
+
+class _SYTextFieldState extends State<SYTextField> {
+  String goingToAdd = "";
+  bool _focusRequested = false;
+  bool _focusRequestedDone = false;
+
+  @override
+  void initState() {
+    if (widget.autoFocus != null && widget.autoFocus!) {
+      Future.delayed(const Duration(milliseconds: 200), () async {
+        if (mounted) {
+          _focusRequested = true;
+          setState(() {});
+        }
+      });
+    }
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Determine keyboardType and inputFormatters based on SYNumeric type
+    TextInputType keyboardType = TextInputType.text;
+    List<TextInputFormatter>? inputFormatters;
+
+    if (widget.numericType == SYNumeric.intValue) {
+      keyboardType = TextInputType.number;
+      inputFormatters = [FilteringTextInputFormatter.digitsOnly];
+    } else if (widget.numericType == SYNumeric.doubleValue) {
+      keyboardType = const TextInputType.numberWithOptions(decimal: true);
+      inputFormatters = [
+        FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d*')),
+      ];
+    }
+
+    return Autocomplete<String>(
+      optionsBuilder: (TextEditingValue textEditingValue) {
+        if (widget.optionList == null) {
+          return const Iterable<String>.empty();
+        }
+        List<String> h = widget.optionList!.where((String e) {
+          return e.toLowerCase().contains(textEditingValue.text.toLowerCase());
+        }).toList();
+        if (textEditingValue.text.isNotEmpty &&
+            !h
+                .map((e) => e.toLowerCase())
+                .toList()
+                .contains(textEditingValue.text.toLowerCase())) {
+          h.add(textEditingValue.text);
+          goingToAdd = textEditingValue.text;
+        } else {
+          goingToAdd = "";
+        }
+
+        return h;
+      },
+      optionsViewBuilder: widget.optionList == null
+          ? null
+          : (BuildContext context, AutocompleteOnSelected<String> onSelected,
+              Iterable<String> options) {
+              return Align(
+                alignment: Alignment.topLeft,
+                child: Container(
+                  color: const Color.fromARGB(156, 0, 0, 0),
+                  width: 300,
+                  child: ListView.builder(
+                    padding: const EdgeInsets.all(8.0),
+                    itemCount: options.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      String option = options.elementAt(index);
+
+                      return Card(
+                        color: const Color.fromARGB(255, 249, 237, 237),
+                        child: ListTile(
+                          onTap: () async {
+                            if (goingToAdd == option) {
+                              bool? c = await syConfirmPopUp(
+                                  context,
+                                  "Confirm Add",
+                                  "Do you need to add new value $option");
+                              if (c) {
+                                onSelected(option);
+                              }
+                            } else {
+                              onSelected(option);
+                            }
+                          },
+                          title: Text(option),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              );
+            },
+      onSelected: (dd) {
+        if (widget.onSubmitted != null) {
+          widget.onSubmitted!(dd);
+        }
+      },
+      fieldViewBuilder: (BuildContext context,
+          TextEditingController textEditingController,
+          FocusNode focusNode,
+          VoidCallback onFieldSubmitted) {
+        if (!_focusRequestedDone && _focusRequested) {
+          focusNode.requestFocus();
+          _focusRequestedDone = true;
+        }
+        if (widget.old != null) {
+          String d = widget.old!;
+          if (widget.numericType == SYNumeric.doubleValue ||
+              widget.numericType == SYNumeric.intValue) {
+            d = d.replaceAll(",", "");
+          }
+          textEditingController.text = d;
+        }
+
+        return Padding(
+          padding: const EdgeInsets.all(3.0),
+          child: TextField(
+            controller: textEditingController,
+            keyboardType: keyboardType,
+            inputFormatters: inputFormatters,
+            focusNode: focusNode,
+            maxLines: widget.heightExpanded ? null : 1, // Allow multiple lines
+            expands: widget.heightExpanded,
+            decoration: InputDecoration(
+              prefixIcon: widget.prefixIcon,
+              enabledBorder: const OutlineInputBorder(),
+              focusedBorder: const OutlineInputBorder(),
+              errorBorder: const OutlineInputBorder(
+                borderSide: BorderSide(color: Colors.red, width: 2.0),
+              ),
+              label: Text(
+                widget.label,
+                style: widget.textStyle,
+              ),
+              suffixIcon: widget.onSubmitted == null
+                  ? null
+                  : IconButton(
+                      onPressed: () {
+                        widget.onSubmitted!(textEditingController.text);
+                      },
+                      icon: const Icon(Icons.check)),
+            ),
+            onSubmitted: (dd) {
+              if (widget.onSubmitted != null) {
+                widget.onSubmitted!(dd);
+              }
+            },
+            onChanged: (dd) {
+              widget.onChanged(dd.trim());
+            },
           ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, typed),
-            child: const Text("Save"),
-          ),
-        ],
-      );
-    },
-  );
+        );
+      },
+    );
+  }
 }
 
 Future<void> syWait(double? time) async {
@@ -1763,6 +1952,45 @@ class SYOnTap extends StatelessWidget {
         onLongPress: onLongPress,
         child: child,
       ),
+    );
+  }
+}
+
+class SYBorderBox extends StatelessWidget {
+  const SYBorderBox({
+    super.key,
+    required this.child,
+    this.color,
+    this.fillColor,
+    this.width,
+    this.height,
+    this.borderWidth,
+    this.radius,
+  });
+
+  final Widget child;
+  final Color? fillColor;
+  final Color? color;
+  final double? width; // Updated to double for more precise control
+  final double? height; // Updated to double for more precise control
+  final double? borderWidth; // Updated to double for more precise control
+  final double? radius; // Updated to double for more precise control
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: width,
+      height: height,
+      decoration: BoxDecoration(
+        color: fillColor,
+        borderRadius:
+            radius == null ? null : BorderRadius.all(Radius.circular(radius!)),
+        border: Border.all(
+          color: color ?? Colors.black54,
+          width: borderWidth ?? 0.5,
+        ),
+      ),
+      child: child,
     );
   }
 }
