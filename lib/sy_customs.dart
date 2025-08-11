@@ -54,6 +54,9 @@ Future<dynamic> syServerResponse(
 }
 
 String syFirstCapital(String name) {
+  if (name.isEmpty) {
+    return "";
+  }
   return name[0].toUpperCase() + name.substring(1);
 }
 
@@ -756,6 +759,8 @@ enum SYIconText {
   whole('whole'),
   eggs('eggs'),
   donate('donate'),
+  talking('talking'),
+  wholesale('wholesale'),
   verified('verified'),
   download('download'),
   notification('notification'),
@@ -815,11 +820,14 @@ enum SYIconText {
   map('map'),
   map2('map2'),
   yeezzLogo('yeezzLogo'),
+  insta('insta'),
   go('go'),
+  youTube('youTube'),
   construction('construction'),
   form('form'),
   thinking('thinking'),
   chicken('chicken'),
+  website('website'),
   whatsapp('whatsapp'),
   eggWaste('eggWaste'),
   eggLaid('eggLaid'),
@@ -827,8 +835,11 @@ enum SYIconText {
   noUpdate('noUpdate'),
   send('send'),
   analysis('analysis'),
+  ai('ai'),
   building('building'),
   chat('chat'),
+  tikTok('tikTok'),
+  faceBook('faceBook'),
   newForm('newForm'),
   pdf('pdf'),
   accounts('accounts'),
@@ -882,13 +893,19 @@ enum SYIconText {
         return SYIconText.orders;
       case 'analysis':
         return SYIconText.analysis;
+      case 'ai':
+        return SYIconText.ai;
       case 'notification':
         return SYIconText.notification;
       case 'whole':
         return SYIconText.whole;
 
+      case 'wholesale':
+        return SYIconText.wholesale;
       case 'verified':
         return SYIconText.verified;
+      case 'talking':
+        return SYIconText.talking;
       case 'eggs':
         return SYIconText.eggs;
       case 'donate':
@@ -981,6 +998,8 @@ enum SYIconText {
         return SYIconText.map2;
       case 'map':
         return SYIconText.map;
+      case 'insta':
+        return SYIconText.insta;
       case 'construction':
         return SYIconText.construction;
       case 'form':
@@ -989,14 +1008,22 @@ enum SYIconText {
         return SYIconText.thinking;
       case 'chicken':
         return SYIconText.chicken;
+      case 'website':
+        return SYIconText.website;
       case 'whatsapp':
         return SYIconText.whatsapp;
       case 'noUpdate':
         return SYIconText.noUpdate;
       case 'building':
         return SYIconText.building;
+      case 'tikTok':
+        return SYIconText.tikTok;
+      case 'faceBook':
+        return SYIconText.faceBook;
       case 'newForm':
         return SYIconText.newForm;
+      case 'youTube':
+        return SYIconText.youTube;
       case 'house':
         return SYIconText.house;
       case 'customize':
@@ -1063,6 +1090,10 @@ class SYIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     String icon = 'packages/sy_customs/assets/icons/error.svg';
     switch (data) {
+      case SYIconText.talking:
+        icon = 'packages/sy_customs/assets/svg/talking.svg';
+      case SYIconText.wholesale:
+        icon = 'packages/sy_customs/assets/svg/wholesale.svg';
       case SYIconText.verified:
         icon = 'packages/sy_customs/assets/svg/verified.svg';
       case SYIconText.donate:
@@ -1121,6 +1152,8 @@ class SYIcon extends StatelessWidget {
         icon = 'packages/sy_customs/assets/svg/pdf.svg';
       case SYIconText.analysis:
         icon = 'packages/sy_customs/assets/svg/analysis.svg';
+      case SYIconText.ai:
+        icon = 'packages/sy_customs/assets/svg/ai.svg';
       case SYIconText.personRelation:
         icon = 'packages/sy_customs/assets/svg/personRelation.svg';
         break;
@@ -1225,8 +1258,14 @@ class SYIcon extends StatelessWidget {
       case SYIconText.map2:
         icon = 'packages/sy_customs/assets/svg/map2.svg';
         break;
+      case SYIconText.insta:
+        icon = 'packages/sy_customs/assets/svg/insta.svg';
+        break;
       case SYIconText.construction:
         icon = 'packages/sy_customs/assets/svg/construction.svg';
+        break;
+      case SYIconText.website:
+        icon = 'packages/sy_customs/assets/svg/website.svg';
         break;
       case SYIconText.whatsapp:
         icon = 'packages/sy_customs/assets/svg/whatsapp.svg';
@@ -1243,8 +1282,18 @@ class SYIcon extends StatelessWidget {
       case SYIconText.form:
         icon = 'packages/sy_customs/assets/svg/form.svg';
         break;
+      case SYIconText.youTube:
+        icon = 'packages/sy_customs/assets/svg/youTube.svg';
+        break;
+
+      case SYIconText.tikTok:
+        icon = 'packages/sy_customs/assets/svg/tikTok.svg';
+        break;
       case SYIconText.newForm:
         icon = 'packages/sy_customs/assets/svg/new_form.svg';
+        break;
+      case SYIconText.faceBook:
+        icon = 'packages/sy_customs/assets/svg/faceBook.svg';
         break;
       case SYIconText.house:
         icon = 'packages/sy_customs/assets/svg/house.svg';
@@ -1303,7 +1352,13 @@ class SYIcon extends StatelessWidget {
   }
 }
 
-enum DateTimeSelectionMode { dateOnly, timeOnly, dateAndTime, dateWithOutYear }
+enum DateTimeSelectionMode {
+  dateOnly,
+  timeOnly,
+  dateAndTime,
+  dateWithOutYear,
+  dateTyping,
+}
 
 Future<DateTime?> sySelectDateTime(
   BuildContext context,
@@ -1312,6 +1367,59 @@ Future<DateTime?> sySelectDateTime(
   String? helpText,
 }) async {
   TimeOfDay? selectedTime;
+
+  if (mode == DateTimeSelectionMode.dateTyping) {
+    // Show manual input dialog inside the same function
+
+    final controller = TextEditingController();
+    const formatString = 'yyyy-MM-dd'; // or change based on your needs
+    if (selectedDate != null) {
+      controller.text = DateFormat(formatString).format(selectedDate);
+    }
+
+    DateTime? parsedDateTime;
+
+    final manualInputResult = await showDialog<DateTime>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(helpText ?? 'Enter date manually (YYYY-MM-DD)'),
+        content: TextFormField(
+          controller: controller,
+          decoration: const InputDecoration(
+            labelText: 'Format: $formatString',
+            hintText: 'e.g. 2025-08-11',
+          ),
+          keyboardType: TextInputType.datetime,
+          autofocus: true,
+          onFieldSubmitted: (_) => Navigator.of(context).pop(parsedDateTime),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(null),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              try {
+                parsedDateTime =
+                    DateFormat(formatString).parseStrict(controller.text);
+                Navigator.of(context).pop(parsedDateTime);
+              } catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Invalid date format')),
+                );
+              }
+            },
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+
+    return manualInputResult;
+  }
+
+  // Existing code for other modes:
 
   if (mode == DateTimeSelectionMode.dateOnly ||
       mode == DateTimeSelectionMode.dateAndTime) {
@@ -1371,6 +1479,14 @@ Future<DateTime?> sySelectDateTime(
     );
   }
 
+  if (mode == DateTimeSelectionMode.dateWithOutYear && selectedDate != null) {
+    return DateTime(
+      DateTime.now().year,
+      selectedDate.month,
+      selectedDate.day,
+    );
+  }
+
   return null;
 }
 
@@ -1416,7 +1532,7 @@ String syDisplayTimeWithAmPm(
   }
 }
 
-String? syDisplayTimeWithAmPm2Nullable(DateTime? time,
+String? syDisplayTimeWithAmPmNullable(DateTime? time,
     {DateTimeSelectionMode mode = DateTimeSelectionMode.dateOnly}) {
   if (time == null) {
     return null;
@@ -1748,10 +1864,14 @@ class SYTextField extends StatefulWidget {
     this.prefixIcon,
     this.autoFocus,
     this.numericType, // Updated to accept SYNumeric
+    this.maxLines, // Updated to accept SYNumeric
+    this.readOnly, // Updated to accept SYNumeric
   });
 
   final bool heightExpanded;
   final bool? autoFocus;
+  final bool? readOnly;
+  final int? maxLines;
   final Widget? prefixIcon;
   final Color borderColor;
   final Color focusBorderColor;
@@ -1890,7 +2010,8 @@ class _SYTextFieldState extends State<SYTextField> {
             keyboardType: keyboardType,
             inputFormatters: inputFormatters,
             focusNode: focusNode,
-            maxLines: widget.heightExpanded ? null : 1, // Allow multiple lines
+            readOnly: widget.readOnly ?? false,
+            maxLines: widget.maxLines, // Allow multiple lines
             expands: widget.heightExpanded,
             decoration: InputDecoration(
               prefixIcon: widget.prefixIcon,
